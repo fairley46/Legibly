@@ -1,5 +1,7 @@
 # ShipSignal
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
 > Engineering teams are shipping faster than ever. The communication layer hasn't kept up.
 
 ---
@@ -11,6 +13,7 @@
 - [How It Works](#how-it-works)
 - [Quick Start](#quick-start)
 - [Setup Guide](#setup-guide)
+- [Local Development](#local-development)
 - [Personas](#personas)
   - [Built-in Personas](#built-in-personas)
   - [Adding a Persona](#adding-a-persona)
@@ -19,7 +22,7 @@
 - [Brand Voice](#brand-voice)
 - [Output](#output)
 - [Manual Runs](#manual-runs)
-- [Forking for Your Team](#forking-for-your-team)
+- [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ---
@@ -80,20 +83,21 @@ Everything else is automatic.
 ## Quick Start
 
 ```bash
-# 1. Fork this repo
+# 1. Fork this repo on GitHub
 
-# 2. Copy the sample config
+# 2. Copy and configure the sample config
 cp examples/sample-team-config.yml config/team-config.yml
 
-# 3. Edit config/team-config.yml
-#    - Set your team name and Jira project key
-#    - Set your ai_provider.type
-#    - Configure your deploy_points and personas
+# 3. Set your team name, Jira project key, AI provider, and deploy points
 
-# 4. Add your secrets to GitHub Actions (see Setup Guide)
+# 4. Add secrets to GitHub Actions (AI_API_KEY, JIRA_BASE_URL, JIRA_USER_EMAIL, JIRA_API_TOKEN)
 
-# 5. Push to a configured branch and watch it run
+# 5. Test locally before pushing (see Local Development)
+
+# 6. Push to a configured branch — ShipSignal runs automatically
 ```
+
+See the [Setup Guide](#setup-guide) for full configuration details.
 
 ---
 
@@ -101,7 +105,7 @@ cp examples/sample-team-config.yml config/team-config.yml
 
 ### Step 1 — Configure your team
 
-Copy the sample config and open it:
+Copy the sample config:
 
 ```bash
 cp examples/sample-team-config.yml config/team-config.yml
@@ -182,11 +186,51 @@ This file is owned by the product team. No engineering changes needed to update 
 
 ---
 
+## Local Development
+
+Test your configuration and personas locally before pushing to CI.
+
+**Setup:**
+
+```bash
+cp .env.local.example .env.local
+# Fill in your values — at minimum set AI_API_KEY and DEPLOY_ENVIRONMENT
+```
+
+**Run:**
+
+```bash
+cd action
+npm install
+npm run dev
+```
+
+`DRY_RUN=true` is set in `.env.local.example` by default — ShipSignal will generate notes and print them to your terminal without writing any files or committing anything.
+
+**Other useful commands:**
+
+```bash
+npm run typecheck   # type-check without building
+npm run lint        # run ESLint
+npm run build       # compile TypeScript to dist/
+```
+
+**Testing a new persona locally:**
+
+1. Create your persona file in `personas/`
+2. Add it to `deploy_points[].personas` in `config/team-config.yml`
+3. Set `PERSONA_OVERRIDE=your-persona-name` in `.env.local`
+4. Run `npm run dev` and review the output before pushing
+
+---
+
 ## Personas
 
 Personas are the core of ShipSignal. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience — who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
 
 **No code changes are needed to manage personas.** Add a file, edit a file, delete a file.
+
+---
 
 ### Built-in Personas
 
@@ -197,6 +241,8 @@ Personas are the core of ShipSignal. Each persona is a plain markdown file in th
 | `technical-user.md` | Engineers, admins — specifics, metrics, breaking changes | Staging, Production |
 | `partner.md` | Integration partners — API changes, SDK impacts, deprecations | Production |
 | `internal.md` | QA, product team — what to validate, what to watch for | Staging / UAT |
+
+See `examples/sample-output-end-user.md` for an example of generated output.
 
 ---
 
@@ -235,10 +281,10 @@ One paragraph describing the register and style.
 ```yaml
 deploy_points:
   - environment: production
-    personas: [executive, end-user, partner, enterprise-admin]  # added here
+    personas: [executive, end-user, partner, enterprise-admin]
 ```
 
-That's it. ShipSignal will include it on the next run.
+4. Test locally with `PERSONA_OVERRIDE=enterprise-admin npm run dev` before pushing.
 
 ---
 
@@ -274,7 +320,7 @@ It defines:
 - **Metric translation guide** — how to convert technical numbers into customer language
 - **Sensitive information rules** — what to never expose (infra topology, vulnerability details, internal ticket IDs)
 
-Update `config/voice.md` whenever your brand voice evolves, a new communications standard is adopted, or you find patterns in the output that need to be corrected across all personas at once.
+Update `config/voice.md` whenever your brand voice evolves, a new communications standard is adopted, or you find patterns in output that need correcting across all personas at once.
 
 ---
 
@@ -307,9 +353,7 @@ generated_by: ShipSignal
 ---
 ```
 
-Followed by the release note content in the persona's defined structure.
-
-If a push contains no user-visible changes (pure internal refactor, dependency updates with no impact), ShipSignal skips file generation for that run.
+If a push contains no user-visible changes — pure internal refactor, dependency bumps with no impact — ShipSignal skips file generation for that run.
 
 ---
 
@@ -324,18 +368,32 @@ Optional inputs:
 | `environment` | Override the detected environment | `production` |
 | `personas` | Comma-separated persona override | `executive,end-user` |
 
-Useful for re-generating notes after updating a persona file, or for testing a new persona before it goes live.
+Useful for re-generating notes after updating a persona file, or for previewing a new persona against a recent commit before wiring it into the pipeline.
 
 ---
 
-## Forking for Your Team
+## Troubleshooting
 
-1. Fork this repo
-2. Set `ai_provider.type` in `config/team-config.yml` to match your stack
-3. Update `config/voice.md` to reflect your brand voice
-4. Update or add personas in `personas/` for your specific audiences
-5. Add your secrets
-6. Push — ShipSignal runs on the next merge
+**`Persona file not found: personas/X.md`**
+A persona listed in `team-config.yml` doesn't have a corresponding file in `personas/`. Either create the file or remove the persona name from the `deploy_points[].personas` list.
+
+**`No deploy point configured for environment: X`**
+The detected environment doesn't match any `deploy_points[].environment` in your config. Check your branch pattern matches the branch you pushed to, or use a `workflow_dispatch` run with an explicit environment override.
+
+**`Unknown ai_provider.type`**
+The `ai_provider.type` in `team-config.yml` isn't one of the supported values. Supported: `anthropic`, `github-copilot`, `openai`, `azure-openai`.
+
+**AI call fails with 401 / authentication error**
+Your `AI_API_KEY` secret is missing, expired, or set incorrectly. For GitHub Copilot Enterprise, confirm your `GITHUB_TOKEN` has Copilot API access enabled at the org level.
+
+**Jira tickets not appearing in generated notes**
+Check that `JIRA_BASE_URL`, `JIRA_USER_EMAIL`, and `JIRA_API_TOKEN` are all set. Verify commit messages reference ticket IDs matching the pattern `PROJ-123` where `PROJ` matches your `jira_project_key`. Jira errors are non-fatal — the run continues without ticket context rather than failing.
+
+**Bot commit fails with `refusing to allow... without workflow scope`**
+The `GITHUB_TOKEN` in your Actions environment doesn't have permission to push to a protected branch. Either loosen branch protection rules to allow the ShipSignal bot, or set the workflow to write to a separate branch.
+
+**Output is vague or missing metrics**
+The quality of generated notes depends on the quality of inputs. Write descriptive PR descriptions and include performance data in commit messages or Jira ticket descriptions. The AI extracts what it's given — if the signal isn't there, the output reflects that.
 
 ---
 
