@@ -7,8 +7,24 @@ import { callAI } from './ai-provider.js';
 import { writeOutput } from './output-writer.js';
 import type { GeneratedNote } from './types.js';
 
+function checkSecrets(providerType: string): void {
+  const needsApiKey = providerType !== 'github-copilot';
+  if (needsApiKey && !process.env['AI_API_KEY']) {
+    console.log(`AI_API_KEY secret is not set (required for provider: ${providerType}).`);
+    console.log('Add it to your repo or org secrets under Settings > Secrets and variables > Actions.');
+    console.log('Skipping ShipSignal run.');
+    process.exit(0);
+  }
+  if (providerType === 'github-copilot' && !process.env['GITHUB_TOKEN']) {
+    console.log('GITHUB_TOKEN is not set (required for github-copilot provider). Skipping.');
+    process.exit(0);
+  }
+}
+
 async function run(): Promise<void> {
   const config = await loadConfig();
+
+  checkSecrets(config.ai_provider.type);
 
   const deployEnv = process.env['DEPLOY_ENVIRONMENT'];
   if (!deployEnv) throw new Error('DEPLOY_ENVIRONMENT env var is required');
