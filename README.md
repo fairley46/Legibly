@@ -14,26 +14,17 @@
 - [The Problem](#the-problem)
 - [What ShipSignal Does](#what-shipsignal-does)
 - [How It Works](#how-it-works)
+- [Repo layout](#repo-layout)
 - [End-to-End Example](#end-to-end-example)
 - [Quick Start](#quick-start)
 - [Setup Guide](#setup-guide)
 - [Engineering Process](#engineering-process)
 - [Local Development](#local-development)
 - [Personas](#personas)
-  - [Built-in Personas](#built-in-personas)
-  - [Adding a Persona](#adding-a-persona)
-  - [Editing a Persona](#editing-a-persona)
-  - [Removing a Persona](#removing-a-persona)
 - [Brand Voice](#brand-voice)
-  - [Use a pre-built voice](#use-a-pre-built-voice)
-  - [Build your own](#build-your-own)
 - [Output](#output)
 - [Manual Runs](#manual-runs)
 - [Notifications](#notifications)
-  - [Configuration](#configuration)
-  - [Slack and Microsoft Teams](#slack-and-microsoft-teams)
-  - [Confluence](#confluence)
-  - [Custom webhook](#custom-webhook)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -120,6 +111,20 @@ Content customization happens in two places:
 - **`personas/*.md`**: one file per audience. Add, edit, or remove. No code changes needed.
 
 The automatic path (merge → generate → commit) runs on every push with no action needed. The notification path is always manual: an engineer reads the committed notes first, then decides to send.
+
+---
+
+## Repo layout
+
+| Folder / file | What it is |
+|---|---|
+| `personas/` | One markdown file per audience. Add, edit, or remove — no code changes needed. |
+| `voices/` | Pre-built brand voice styles. Copy one to `config/voice.md` to get started. |
+| `config/` | Your `team-config.yml` (deploy points, AI provider) and `voice.md` (brand voice) live here. |
+| `examples/` | Sample config and a full end-to-end walkthrough. Start here. |
+| `release-notes/` | Where ShipSignal commits generated markdown. Organised by environment. |
+| `action/` | The GitHub Action source code (TypeScript). You don't need to touch this. |
+| `prompts/` | The AI prompt templates ShipSignal uses internally. |
 
 ---
 
