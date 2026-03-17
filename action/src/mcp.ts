@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 import { loadConfig, repoRoot } from './config-loader.js';
 import { fetchPRDescription } from './github.js';
@@ -40,17 +40,31 @@ function buildMcpGitContext(opts: {
   };
 }
 
-function getPersonaDescription(personaName: string): string {
-  const personaPath = resolve(repoRoot, 'personas', `${personaName}.md`);
-  if (!existsSync(personaPath)) return '';
-  const lines = readFileSync(personaPath, 'utf8').split('\n');
+function getFirstDescriptionLine(filePath: string): string {
+  if (!existsSync(filePath)) return '';
+  const lines = readFileSync(filePath, 'utf8').split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      return trimmed;
-    }
+    if (trimmed && !trimmed.startsWith('#')) return trimmed;
   }
   return '';
+}
+
+function listVoices(): { name: string; description: string }[] {
+  const voicesDir = resolve(repoRoot, 'voices');
+  let files: string[] = [];
+  try {
+    files = readdirSync(voicesDir);
+  } catch {
+    return [];
+  }
+  return files
+    .filter((f) => f.endsWith('.md') && f !== 'README.md')
+    .map((f) => {
+      const name = f.replace(/\.md$/, '');
+      const description = getFirstDescriptionLine(resolve(voicesDir, f));
+      return { name, description };
+    });
 }
 
 async function main(): Promise<void> {
@@ -86,7 +100,9 @@ async function main(): Promise<void> {
 
       const lines: string[] = ['**Legibly Personas**\n'];
       for (const [name, envs] of personaMap) {
-        const description = getPersonaDescription(name);
+        const description = getFirstDescriptionLine(
+          resolve(repoRoot, 'personas', `${name}.md`)
+        );
         lines.push(`**${name}**`);
         lines.push(`  Environments: ${envs.join(', ')}`);
         if (description) lines.push(`  ${description}`);
@@ -99,10 +115,45 @@ async function main(): Promise<void> {
     }
   );
 
+  // Tool: list-voices
+  server.tool(
+    'list-voices',
+    'List all available brand voices. The active voice is config/voice.md. Pass a voice name to the translate tool to override it for a single translation.',
+    {},
+    async () => {
+      const voices = listVoices();
+
+      if (voices.length === 0) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: 'No voice files found in voices/. The active voice is config/voice.md.',
+            },
+          ],
+        };
+      }
+
+      const lines: string[] = ['**Available Voices**\n'];
+      for (const { name, description } of voices) {
+        lines.push(`**${name}**`);
+        if (description) lines.push(`  ${description}`);
+        lines.push('');
+      }
+      lines.push(
+        'Pass the name (e.g. `the-operator`) as the `voice` parameter on `translate` to use it.'
+      );
+
+      return {
+        content: [{ type: 'text' as const, text: lines.join('\n') }],
+      };
+    }
+  );
+
   // Tool: translate
   server.tool(
     'translate',
-    'Translate a PR into audience-specific release notes using Legibly. Provide either pr_url or pr_description (or both), plus a persona name.',
+    'Translate a PR into audience-specific release notes. Pick your audience (persona), tone (voice), and framing (environment). Provide either pr_url or pr_description.',
     {
       pr_url: z
         .string()
@@ -116,12 +167,18 @@ async function main(): Promise<void> {
         .describe('PR body text, pasted directly. Alternative or supplement to pr_url.'),
       persona: z
         .string()
-        .describe('Persona name to generate for. Use list-personas to see available options.'),
+        .describe('Who to write for. Use list-personas to see available options.'),
+      voice: z
+        .string()
+        .optional()
+        .describe(
+          'Brand voice to use. Use list-voices to see options. Omit to use the default voice in config/voice.md.'
+        ),
       environment: z
         .string()
         .optional()
         .describe(
-          'Deployment environment: production, staging, hotfix, canary. Defaults to production.'
+          'How to frame the changes. production (delivered value), staging (what to validate), hotfix (what broke and what\'s fixed), canary (gradual rollout). Defaults to production.'
         ),
       diff: z
         .string()
@@ -139,6 +196,7 @@ async function main(): Promise<void> {
         pr_url,
         pr_description,
         persona,
+        voice,
         environment,
         diff,
         commit_messages,
@@ -163,9 +221,7 @@ async function main(): Promise<void> {
       // Validate persona exists
       const personaPath = resolve(repoRoot, 'personas', `${persona}.md`);
       if (!existsSync(personaPath)) {
-        const available = [
-          ...new Set(config.deploy_points.flatMap((dp) => dp.personas)),
-        ];
+        const available = [...new Set(config.deploy_points.flatMap((dp) => dp.personas))];
         return {
           content: [
             {
@@ -175,6 +231,25 @@ async function main(): Promise<void> {
           ],
           isError: true,
         };
+      }
+
+      // Resolve voice override
+      let voiceOverride: string | undefined;
+      if (voice) {
+        const voicePath = resolve(repoRoot, 'voices', `${voice}.md`);
+        if (!existsSync(voicePath)) {
+          const available = listVoices().map((v) => v.name);
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: `Error: voice "${voice}" not found.\n\nAvailable voices: ${available.join(', ')}\n\nUse the list-voices tool to see details. Omit the voice parameter to use the default in config/voice.md.`,
+              },
+            ],
+            isError: true,
+          };
+        }
+        voiceOverride = readFileSync(voicePath, 'utf8');
       }
 
       // Resolve deploy point
@@ -229,6 +304,7 @@ async function main(): Promise<void> {
           prDescription: prDescriptionText,
           jiraTickets,
           config,
+          voiceOverride,
         });
 
         const content = await callAI(prompt, config);

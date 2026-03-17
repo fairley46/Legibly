@@ -13,6 +13,48 @@ The MCP skill exposes Legibly's translation pipeline conversationally, inside an
 
 ---
 
+## Three things you control per translation
+
+Every `translate` call has three axes. Mix and match freely.
+
+### 1. Audience — `persona`
+
+Who are you writing for? Use `list-personas` to see what's configured.
+
+```
+customer      → non-technical users; felt experience, not implementation
+vp            → executives; business outcomes and risk only
+technical-user → engineers and admins; metrics, endpoints, breaking changes
+partner       → integration partners; API surfaces and deprecation timelines
+internal      → QA and PMs; test scenarios, Jira IDs, edge cases
+```
+
+### 2. Tone — `voice`
+
+How should it sound? Use `list-voices` to see the six pre-built options. Omit to use your configured default (`config/voice.md`).
+
+```
+the-operator          → direct, metrics-first, accountability-driven
+the-visionary         → minimalist, human-centered, poetic
+the-storyteller       → warm, authentic, failure-honest
+the-customer-champion → principled, clarity-obsessed, customer-first
+the-straight-shooter  → raw, fast, zero corporate
+the-connector         → empathetic, research-grounded, community-oriented
+```
+
+### 3. Framing — `environment`
+
+How should the changes be positioned? Defaults to `production`.
+
+```
+production → delivered value, present tense, customers can use it today
+staging    → what's being validated before production; Jira IDs appropriate
+hotfix     → lead with what broke and what's now resolved; direct about severity
+canary     → gradual rollout; changes not yet universally available
+```
+
+---
+
 ## Requirements
 
 - Node.js 20+
@@ -46,14 +88,14 @@ The server command is always the same regardless of client:
 node /absolute/path/to/repo/action/dist/mcp.js
 ```
 
-Required env vars:
+**Required env vars:**
 
 | Variable | Notes |
 |---|---|
 | `LEGIBLY_REPO_ROOT` | Absolute path to the repo root. Missing = startup crash. |
 | `AI_API_KEY` | Your AI provider key (Anthropic, OpenAI, Azure). Not needed for GitHub Copilot provider. |
 
-Optional env vars:
+**Optional env vars:**
 
 | Variable | Notes |
 |---|---|
@@ -62,7 +104,7 @@ Optional env vars:
 
 ---
 
-### Client-specific config
+### Client config examples
 
 #### Claude Desktop
 
@@ -84,12 +126,11 @@ Optional env vars:
 }
 ```
 
-Restart Claude Desktop after editing. The tools will appear automatically.
+Restart Claude Desktop after editing.
 
 #### opencode
 
 ```toml
-# ~/.config/opencode/config.toml  (or opencode.json — check your version)
 [mcp.legibly]
 command = "node"
 args = ["/absolute/path/to/repo/action/dist/mcp.js"]
@@ -102,7 +143,7 @@ GITHUB_TOKEN = "ghp_..."
 
 #### Cursor
 
-In Cursor settings, add under **MCP Servers**:
+In Cursor settings, under **MCP Servers**:
 
 ```json
 {
@@ -119,7 +160,7 @@ In Cursor settings, add under **MCP Servers**:
 
 #### Any other client
 
-If your client supports stdio MCP servers, the config shape is the same pattern: command `node`, args pointing to `dist/mcp.js`, env with `LEGIBLY_REPO_ROOT` and `AI_API_KEY`. Check your client's docs for where to put it.
+Same pattern: command `node`, args pointing to `dist/mcp.js`, env with `LEGIBLY_REPO_ROOT` and `AI_API_KEY`. Check your client's docs for where to put it.
 
 ### 3. Verify
 
@@ -135,124 +176,96 @@ You should get a list of all personas from your `config/team-config.yml`.
 
 Lists every persona configured in `team-config.yml`, the environments each appears in, and a one-line description from the persona file.
 
-**When to use:** before translating, to check what persona names are available.
+### `list-voices`
 
-**Example prompt:**
-> What personas does Legibly know about?
-
-**Example output:**
-```
-**Legibly Personas**
-
-**vp**
-  Environments: production, hotfix
-  C-suite and VP-level stakeholders. Business outcomes, risk, and customer impact only.
-
-**customer**
-  Environments: production, hotfix
-  Day-to-day users of the product. Non-technical. They care about whether things work.
-
-**partner**
-  Environments: production
-  Integration partners and API consumers who have built on top of this platform.
-```
-
----
+Lists all pre-built voices in the `voices/` directory with a one-line description of each. These can be passed to `translate` via the `voice` parameter to override your default `config/voice.md` for a single translation.
 
 ### `translate`
 
-Translates a PR into release notes for a specific persona. Uses your configured AI provider, voice, and prompt — the same pipeline the GitHub Action uses.
-
-**Inputs:**
+Translates a PR into release notes. Combines your chosen persona, voice, and environment to produce a single tailored note.
 
 | Field | Required | Notes |
 |---|---|---|
-| `persona` | Yes | Name from `list-personas` |
-| `pr_url` | One of these | GitHub PR URL — fetches the body via API. Needs `GITHUB_TOKEN`. |
-| `pr_description` | One of these | Paste the PR body directly. No token needed. |
+| `persona` | Yes | Who to write for. Use `list-personas`. |
+| `pr_url` | One of these | GitHub PR URL. Needs `GITHUB_TOKEN`. |
+| `pr_description` | One of these | Paste the PR body directly. |
+| `voice` | No | Override the default voice for this translation. Use `list-voices`. |
 | `environment` | No (default: `production`) | `production`, `staging`, `hotfix`, `canary` |
-| `diff` | No | Output of `git diff HEAD~1 HEAD --stat --unified=0` |
-| `commit_messages` | No | Output of `git log --oneline -20` |
-| `sha` | No | Commit SHA for frontmatter metadata |
-| `branch` | No | Branch name for frontmatter metadata |
-
-At least one of `pr_url` or `pr_description` is required.
+| `diff` | No | `git diff HEAD~1 HEAD --stat --unified=0` |
+| `commit_messages` | No | `git log --oneline -20` |
+| `sha` / `branch` | No | Metadata for generated frontmatter |
 
 ---
 
 ## Usage Patterns
 
-### Quickest path — paste a PR description
-
-Open a PR on GitHub, copy the description, then ask:
+### Quickest path — paste and pick
 
 > Translate this for the customer persona:
 >
 > [paste PR description]
 
+### Full three-axis control
+
+> Translate this for the vp persona, using the-straight-shooter voice, with hotfix framing.
+>
+> [paste PR description]
+
 ### With a PR URL
 
-If `GITHUB_TOKEN` is set:
-
-> Translate https://github.com/your-org/your-repo/pull/456 for the vp persona.
-
-Legibly fetches the PR body automatically.
+> Translate https://github.com/your-org/your-repo/pull/456 for the technical-user persona.
 
 ### With extra context (richer output)
-
-More context → sharper notes. Run these before asking:
 
 ```bash
 git diff HEAD~1 HEAD --stat --unified=0
 git log --oneline -20
 ```
 
-Then paste alongside your request:
-
-> Translate this PR for the technical-user persona.
+> Translate this PR for the partner persona. Here's the diff and commits:
 >
-> **PR description:** [paste]
-> **Diff:** [paste]
-> **Commits:** [paste]
+> [paste both]
 
-### Staging or hotfix framing
+### Compare personas
 
-> Translate this for the internal persona using staging environment framing.
+> Translate this for the vp persona and then for the customer persona.
+>
+> [PR description]
 
-The `environment` field changes how the AI frames changes — staging emphasizes what to validate, hotfix leads with what was broken and what's resolved.
+Two `translate` calls, both results returned.
 
-### Compare personas side by side
+### Try a different voice
 
-> Translate this PR for the vp persona and then for the customer persona.
-
-Two separate `translate` calls, both results returned.
+> Translate this for the customer persona using the-storyteller voice.
+>
+> [PR description]
 
 ---
 
 ## Troubleshooting
 
-**"Legibly MCP: failed to load config"** — `LEGIBLY_REPO_ROOT` is missing or doesn't point to a directory with `config/team-config.yml`. Verify the path is absolute and correct.
+**"Legibly MCP: failed to load config"** — `LEGIBLY_REPO_ROOT` is missing or doesn't point to a directory with `config/team-config.yml`.
 
-**"Error: persona 'X' not found"** — Persona name doesn't match any file in `personas/`. The error lists available options. Use `list-personas` first.
+**"Error: persona 'X' not found"** — Use `list-personas` to see valid names.
+
+**"Error: voice 'X' not found"** — Use `list-voices` to see valid names. Omit `voice` to use your default.
 
 **"Error generating release notes: 401"** — `AI_API_KEY` is missing or invalid.
 
-**PR URL fetch returns "Pull request description unavailable"** — `GITHUB_TOKEN` is not set or lacks `repo` read access. Add it or paste the description directly.
+**PR URL fetch returns "Pull request description unavailable"** — `GITHUB_TOKEN` is not set or lacks `repo` read access. Paste the description directly instead.
 
-**Tools don't appear in your client** — Verify the path in `args` is absolute, `dist/mcp.js` exists, and you've restarted the client after config changes.
+**Tools don't appear in your client** — Verify the path is absolute, `dist/mcp.js` exists, and you've restarted the client after config changes.
 
-**Output looks vague** — Same cause as the Action: vague PR descriptions produce vague notes. Give it more specific input. See [Engineering Process](setup.md#engineering-process).
+**Output looks vague** — Same cause as the Action: vague PR descriptions produce vague notes. See [Engineering Process](setup.md#engineering-process).
 
 ---
 
 ## Rebuilding After Changes
 
-Personas, voice, config — no rebuild needed. Those files are read at call time.
+Personas, voices, config — no rebuild needed. Those files are read at call time.
 
-Action source code (`.ts` files) — rebuild:
+Action source code (`.ts` files) — rebuild and restart your client:
 
 ```bash
 cd action && npm run build
 ```
-
-Then restart your MCP client to pick up the new `dist/mcp.js`.

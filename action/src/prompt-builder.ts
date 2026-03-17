@@ -37,7 +37,7 @@ export async function buildPrompt(options: PromptBuilderOptions): Promise<string
   const { personaName, deployEnv, deployPoint, gitContext, prDescription, jiraTickets } = options;
 
   const template = readFileSync(resolve(repoRoot, 'prompts/core-prompt.md'), 'utf8');
-  const voiceContent = readFileSync(resolve(repoRoot, 'config/voice.md'), 'utf8');
+  const voiceContent = options.voiceOverride ?? readFileSync(resolve(repoRoot, 'config/voice.md'), 'utf8');
   const personaPath = resolvePersonaPath(personaName);
   const personaContent = readFileSync(personaPath, 'utf8');
 

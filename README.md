@@ -16,7 +16,6 @@
 - [The Problem](#the-problem)
 - [What Legibly Does](#what-legibly-does)
 - [How It Works](#how-it-works)
-- [MCP Skill](#mcp-skill)
 - [Repo layout](#repo-layout)
 - [End-to-End Example](#end-to-end-example)
 - [Quick Start](#quick-start)
@@ -72,7 +71,7 @@ On every merge or push, Legibly:
 
 That's the automatic path — it always runs, no action needed. A second path exists for teams that want to push notes further: once the markdown is committed, an engineer reads it and manually triggers the notification workflow to send to Slack, Teams, Confluence, or a webhook. AI-generated content is never sent automatically.
 
-A third path — the [MCP skill](#mcp-skill) — exposes the same translation pipeline conversationally inside Claude Desktop, for on-demand use before a merge, mid-review, or during standup prep.
+A third path — the [MCP skill](docs/mcp.md) — exposes the same translation pipeline conversationally inside any MCP-compatible client, for on-demand use before a merge, mid-review, or during standup prep.
 
 **Note on output quality:** Legibly translates what it's given. The quality of generated notes is directly proportional to the quality of PR descriptions and commit messages. See [Engineering Process](docs/setup.md#engineering-process) for what to write and why it matters.
 
@@ -111,23 +110,6 @@ Content customization happens in two places:
 - **`personas/*.md`**: one file per audience. Add, edit, or remove. No code changes needed.
 
 The automatic path (merge → generate → commit) runs on every push with no action needed. The notification path is always manual: an engineer reads the committed notes first, then decides to send.
-
----
-
-## MCP Skill
-
-The MCP skill connects Legibly to Claude Desktop so you can translate PRs conversationally — before a merge, mid-review, during standup prep, or when explaining a change to a stakeholder. Same AI provider, personas, and voice as the Action.
-
-**What you can do:**
-- Ask "What personas does Legibly know about?" to see all configured audiences
-- Paste a PR description and get release notes for any persona instantly
-- Give a GitHub PR URL and Legibly fetches the body automatically
-- Add a git diff or commit log for richer, more specific output
-- Request multiple personas at once to compare how the same change reads to different audiences
-
-**Setup in one paragraph:** build the action (`cd action && npm run build`), then register `node action/dist/mcp.js` as an MCP server in whichever client you use — Claude Desktop, opencode, Cursor, Zed, or anything else that speaks stdio MCP. Set `LEGIBLY_REPO_ROOT` and `AI_API_KEY` in the server's env config.
-
-→ [Full MCP setup and usage guide](docs/mcp.md)
 
 ---
 

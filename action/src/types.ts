@@ -104,4 +104,5 @@ export interface PromptBuilderOptions {
   prDescription: string;
   jiraTickets: JiraTicket[];
   config: TeamConfig;
+  voiceOverride?: string;
 }
