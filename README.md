@@ -242,47 +242,16 @@ Personas are the core of ShipSignal. Each persona is a plain markdown file in th
 
 ### Built-in Personas
 
-ShipSignal ships with 5 ready-to-use personas in the `personas/` directory. Each one is a
-character-driven profile — not a demographic, but a specific person in a specific moment,
-with a clear job to do when they open the release note.
+| File | Persona | Who they are | Typical environments |
+|---|---|---|---|
+| `vp.md` | The VP | C-suite or VP exec who owns the board and customer narrative. Reads the first bullet — if it doesn't connect to a business outcome, the email closes. No technical terms, ever. | Production |
+| `customer.md` | The Customer | Power user who lives in the product daily. First question when an update lands: *did this break what I depend on?* Writes to felt experience, not implementation. | Production |
+| `technical-user.md` | The Technical User | Senior engineer or admin keeping their systems working with this product. Scans for `Breaking:` first, then endpoint names, then metrics. Vague language means an untrustworthy note. | Staging, Production |
+| `partner.md` | The Partner | Engineer at a company that has built an integration on top of this platform. A breaking change they miss becomes their customer's problem. Needs exact API surfaces and hard deprecation timelines. | Production |
+| `internal.md` | The Internal User | QA lead or PM running the staging sign-off. Reading this to build a test plan. Every change is a test scenario. Needs Jira IDs, setup steps, and edge cases — not customer-facing framing. | Staging / UAT |
 
-**`vp.md` — The VP**
-C-suite or VP-level exec who owns the board and customer narrative. They've been
-blindsided by engineering surprises before. They read the first bullet — if it doesn't
-connect to a business outcome, they close the email. 3-4 bullets max. Every point
-must tie to revenue, risk, retention, or customer impact. No technical terms.
-
-**`customer.md` — The Customer**
-A power user who lives in the product every day. Non-technical, but knows the product
-deeply. Their first question when an update lands: *did this break what I depend on?*
-Write to the felt experience — "loads faster" not "latency reduced." Use "you." Say
-when nothing needs to change.
-
-**`technical-user.md` — The Technical User**
-A senior engineer or admin responsible for keeping their team's systems working with
-this product. They scan for "Breaking:" first, then endpoint names, then metrics.
-Vague language signals an untrustworthy note. Specific numbers and exact API references
-signal one they can act on and share with their team.
-
-**`partner.md` — The Partner**
-A senior engineer at a company that has built an integration on top of this platform.
-When the platform ships a breaking change they don't catch, their customers file tickets
-against *their* product. They need explicit backward-compat declarations, exact API
-surfaces, and hard deprecation timelines — not vague notices.
-
-**`internal.md` — The Internal User**
-A QA lead or product manager running the staging sign-off. They're reading this note
-to build their test plan for the day. Every change is a test scenario. Every high-risk
-flag is somewhere to spend more time. Frame changes as what to validate, not what was
-delivered. Include Jira ticket IDs. List setup dependencies before anything else.
-
----
-
-Each persona file includes writing instructions, an exact output template, and a
-good/bad example so anyone on the team can generate or review notes for that audience.
-Use `personas/TEMPLATE.md` as a starting point to build your own.
-
-See `examples/sample-output-end-user.md` for a sample of generated output.
+Each file includes writing instructions, an exact output template, and a good/bad example.
+Add your own by copying `personas/TEMPLATE.md` — no code changes needed.
 
 ---
 
@@ -332,60 +301,22 @@ The product team can own and evolve these files independently of the engineering
 
 ## Voice Library
 
-ShipSignal ships with 6 sample voices in the `voices/` directory — communication
-archetypes built from some of the most distinctive communication styles in business.
-Each one is a complete drop-in for `config/voice.md`, or a source of individual
-principles you can blend into your own.
+| File | Voice | Style | Best for | Sample line |
+|---|---|---|---|---|
+| `the-operator.md` | The Operator | Direct, accountable, metrics-first | Ops-heavy products, reliability platforms | *"Checkout errors: was 3.2%. Now 0.1%."* |
+| `the-visionary.md` | The Visionary | Minimalist, poetic, human-centered | Consumer products, design-forward platforms | *"The wait is gone. Search is instant now."* |
+| `the-storyteller.md` | The Storyteller | Warm, authentic, failure-honest | B2C, lifestyle brands, community products | *"We broke this last month. Here's what we learned."* |
+| `the-customer-champion.md` | The Customer Champion | Principled, clear, customer-obsessed | Enterprise B2B, long-term relationships | *"Three enterprise teams flagged this in QBRs. It's resolved."* |
+| `the-straight-shooter.md` | The Straight Shooter | Raw, fast, zero corporate | Developer tools, startup products | *"Search was broken for queries over 50 chars. Fixed. Go try it."* |
+| `the-connector.md` | The Connector | Empathetic, research-grounded, warm | Healthcare, education, HR, community | *"A lot of you have been working around this for months. Here's what changed."* |
 
-**`the-operator.md` — The Operator**
-Direct, accountable, metrics-first. This voice leads with numbers, names problems
-without softening them, and closes with what was done. No throat-clearing. No vague
-enthusiasm. Built for ops-heavy products, reliability platforms, and teams that have
-built trust through consistency and accountability.
-> *"Checkout errors: was 3.2%. Now 0.1%. Here's what we fixed."*
+Pick the one that sounds like you. Edit it freely. Or copy elements from multiple voices
+into your own `config/voice.md`. See `voices/README.md` for guidance.
 
-**`the-visionary.md` — The Visionary**
-Minimalist, poetic, human-centered. This voice strips language to its essentials and
-frames every change as a step toward something larger. Short sentences. Big ideas.
-Built for consumer products, design-forward platforms, and teams with a strong point
-of view about what they're building and why.
-> *"The wait is gone. Search is instant now."*
-
-**`the-storyteller.md` — The Storyteller**
-Warm, authentic, failure-honest. This voice doesn't hide the hard parts. It names
-what went wrong, what was learned, and what's different now. Built for B2C products,
-lifestyle brands, and community-driven teams where authenticity and earned trust
-are part of the product value.
-> *"We broke this last month. Here's what we learned and what we shipped to fix it."*
-
-**`the-customer-champion.md` — The Customer Champion**
-Principled, clear, customer-obsessed. This voice connects every change back to a
-specific customer problem. No update is announced without a reason. Built for
-enterprise B2B products and long-term customer relationships where trust is built
-over years, not campaigns.
-> *"Three enterprise teams flagged this in QBRs. It's resolved."*
-
-**`the-straight-shooter.md` — The Straight Shooter**
-Raw, fast, zero corporate. This voice treats customers like adults and gets to the
-point in the first sentence. No hedging, no softening, no filler. Built for developer
-tools, startup products, and audiences that have zero tolerance for PR language.
-> *"Search was broken for queries over 50 characters. Fixed. Go try it."*
-
-**`the-connector.md` — The Connector**
-Empathetic, research-grounded, warm. This voice names the experience customers were
-having before the fix — not just the fix itself. It validates the struggle before
-announcing the solution. Built for healthcare, education, HR, and community products
-where the customer's emotional experience is central to the value being delivered.
-> *"A lot of you have been working around this for months. We heard it. Here's what changed."*
-
----
-
-To use a voice:
+To use one:
 ```bash
 cp voices/the-operator.md config/voice.md
 ```
-
-Or blend elements from multiple voices into a single `config/voice.md`. See `voices/README.md` for guidance.
 
 ---
 
