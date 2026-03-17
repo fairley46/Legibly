@@ -125,7 +125,7 @@ The MCP skill connects Legibly to Claude Desktop so you can translate PRs conver
 - Add a git diff or commit log for richer, more specific output
 - Request multiple personas at once to compare how the same change reads to different audiences
 
-**Setup in one paragraph:** build the action (`cd action && npm run build`), add `legibly` to your Claude Desktop `mcpServers` config with the path to `dist/mcp.js` and your `LEGIBLY_REPO_ROOT` and `AI_API_KEY`, then restart Claude Desktop.
+**Setup in one paragraph:** build the action (`cd action && npm run build`), then register `node action/dist/mcp.js` as an MCP server in whichever client you use — Claude Desktop, opencode, Cursor, Zed, or anything else that speaks stdio MCP. Set `LEGIBLY_REPO_ROOT` and `AI_API_KEY` in the server's env config.
 
 → [Full MCP setup and usage guide](docs/mcp.md)
 

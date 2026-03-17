@@ -1,6 +1,6 @@
-# MCP Skill — Legibly in Claude Desktop
+# MCP Skill
 
-The MCP skill exposes Legibly's translation pipeline conversationally, inside Claude Desktop or any MCP-compatible client. Same prompt assembly, same AI providers, same personas and voice as the GitHub Action — but on demand, before a merge, mid-review, or during standup prep.
+The MCP skill exposes Legibly's translation pipeline conversationally, inside any MCP-compatible client. Same prompt assembly, same AI providers, same personas and voice as the GitHub Action — but on demand, before a merge, mid-review, or during standup prep.
 
 **Two delivery modes, one translation brain.**
 
@@ -16,7 +16,7 @@ The MCP skill exposes Legibly's translation pipeline conversationally, inside Cl
 ## Requirements
 
 - Node.js 20+
-- Claude Desktop (or any MCP-compatible host)
+- Any MCP-compatible client (Claude Desktop, opencode, Cursor, Zed, Windsurf, etc.)
 - Legibly repo cloned locally and configured (`config/team-config.yml` set up)
 - An AI provider key (`AI_API_KEY`) — same key your GitHub Action uses
 
@@ -24,7 +24,7 @@ The MCP skill exposes Legibly's translation pipeline conversationally, inside Cl
 
 ## Setup
 
-### 1. Build the action package
+### 1. Build
 
 ```bash
 cd action
@@ -38,57 +38,92 @@ Confirm `dist/mcp.js` exists:
 ls action/dist/mcp.js
 ```
 
-### 2. Configure Claude Desktop
+### 2. Register as an MCP server
 
-Open `~/Library/Application Support/Claude/claude_desktop_config.json` and add the `legibly` server. Create the file if it doesn't exist.
+The server command is always the same regardless of client:
 
-```json
-{
-  "mcpServers": {
-    "legibly": {
-      "command": "node",
-      "args": ["/absolute/path/to/your/repo/action/dist/mcp.js"],
-      "env": {
-        "LEGIBLY_REPO_ROOT": "/absolute/path/to/your/repo",
-        "AI_API_KEY": "sk-ant-..."
-      }
-    }
-  }
-}
+```
+node /absolute/path/to/repo/action/dist/mcp.js
 ```
 
-Replace `/absolute/path/to/your/repo` with the actual path where you cloned Legibly. Do not use `~` or relative paths — Claude Desktop requires absolute paths.
+Required env vars:
 
-**Optional env vars:**
+| Variable | Notes |
+|---|---|
+| `LEGIBLY_REPO_ROOT` | Absolute path to the repo root. Missing = startup crash. |
+| `AI_API_KEY` | Your AI provider key (Anthropic, OpenAI, Azure). Not needed for GitHub Copilot provider. |
+
+Optional env vars:
+
+| Variable | Notes |
+|---|---|
+| `GITHUB_TOKEN` | Needed for `pr_url` input (fetches PR body from GitHub API). |
+| `JIRA_BASE_URL` / `JIRA_USER_EMAIL` / `JIRA_API_TOKEN` | Same as the Action. No-ops gracefully if absent. |
+
+---
+
+### Client-specific config
+
+#### Claude Desktop
+
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "legibly": {
       "command": "node",
-      "args": ["/absolute/path/to/your/repo/action/dist/mcp.js"],
+      "args": ["/absolute/path/to/repo/action/dist/mcp.js"],
       "env": {
-        "LEGIBLY_REPO_ROOT": "/absolute/path/to/your/repo",
+        "LEGIBLY_REPO_ROOT": "/absolute/path/to/repo",
         "AI_API_KEY": "sk-ant-...",
-        "GITHUB_TOKEN": "ghp_...",
-        "JIRA_BASE_URL": "https://yourorg.atlassian.net",
-        "JIRA_USER_EMAIL": "you@yourcompany.com",
-        "JIRA_API_TOKEN": "your-jira-token"
+        "GITHUB_TOKEN": "ghp_..."
       }
     }
   }
 }
 ```
 
-`GITHUB_TOKEN` is needed for the `pr_url` input (fetches the PR body from GitHub). `JIRA_*` is optional — the skill works without it.
+Restart Claude Desktop after editing. The tools will appear automatically.
 
-### 3. Restart Claude Desktop
+#### opencode
 
-Quit and reopen Claude Desktop. The Legibly skill will appear as an available tool.
+```toml
+# ~/.config/opencode/config.toml  (or opencode.json — check your version)
+[mcp.legibly]
+command = "node"
+args = ["/absolute/path/to/repo/action/dist/mcp.js"]
 
-### 4. Verify
+[mcp.legibly.env]
+LEGIBLY_REPO_ROOT = "/absolute/path/to/repo"
+AI_API_KEY = "sk-ant-..."
+GITHUB_TOKEN = "ghp_..."
+```
 
-Ask Claude: **"What personas does Legibly know about?"**
+#### Cursor
+
+In Cursor settings, add under **MCP Servers**:
+
+```json
+{
+  "legibly": {
+    "command": "node",
+    "args": ["/absolute/path/to/repo/action/dist/mcp.js"],
+    "env": {
+      "LEGIBLY_REPO_ROOT": "/absolute/path/to/repo",
+      "AI_API_KEY": "sk-ant-..."
+    }
+  }
+}
+```
+
+#### Any other client
+
+If your client supports stdio MCP servers, the config shape is the same pattern: command `node`, args pointing to `dist/mcp.js`, env with `LEGIBLY_REPO_ROOT` and `AI_API_KEY`. Check your client's docs for where to put it.
+
+### 3. Verify
+
+Ask your client: **"What personas does Legibly know about?"**
 
 You should get a list of all personas from your `config/team-config.yml`.
 
@@ -155,11 +190,9 @@ Open a PR on GitHub, copy the description, then ask:
 >
 > [paste PR description]
 
-Claude will call `translate` with your pasted text and the customer persona.
-
 ### With a PR URL
 
-If `GITHUB_TOKEN` is set in your Claude Desktop config:
+If `GITHUB_TOKEN` is set:
 
 > Translate https://github.com/your-org/your-repo/pull/456 for the vp persona.
 
@@ -167,81 +200,59 @@ Legibly fetches the PR body automatically.
 
 ### With extra context (richer output)
 
-More context → sharper notes. Run these in your terminal before asking Claude:
+More context → sharper notes. Run these before asking:
 
 ```bash
 git diff HEAD~1 HEAD --stat --unified=0
 git log --oneline -20
 ```
 
-Then paste the output alongside your request:
+Then paste alongside your request:
 
 > Translate this PR for the technical-user persona.
 >
-> **PR description:**
-> Refactored the search indexer to use incremental builds. Cold start time drops from
-> 45s to 4s. Memory usage reduced by 60% at peak. No API changes.
->
-> **Diff:**
-> [paste diff output]
->
-> **Commits:**
-> [paste git log output]
+> **PR description:** [paste]
+> **Diff:** [paste]
+> **Commits:** [paste]
 
 ### Staging or hotfix framing
 
 > Translate this for the internal persona using staging environment framing.
->
-> [PR description]
 
-The `environment` field changes how the AI frames the changes — staging emphasizes what to validate, hotfix leads with what was broken and what's now resolved.
+The `environment` field changes how the AI frames changes — staging emphasizes what to validate, hotfix leads with what was broken and what's resolved.
 
 ### Compare personas side by side
 
 > Translate this PR for the vp persona and then for the customer persona.
->
-> [PR description]
 
-Claude will make two separate `translate` calls and return both.
+Two separate `translate` calls, both results returned.
 
 ---
 
 ## Troubleshooting
 
-**"Legibly MCP: failed to load config"**
+**"Legibly MCP: failed to load config"** — `LEGIBLY_REPO_ROOT` is missing or doesn't point to a directory with `config/team-config.yml`. Verify the path is absolute and correct.
 
-`LEGIBLY_REPO_ROOT` is either missing or points to a directory that doesn't have `config/team-config.yml`. Verify the path is absolute and correct.
+**"Error: persona 'X' not found"** — Persona name doesn't match any file in `personas/`. The error lists available options. Use `list-personas` first.
 
-**"Error: persona 'X' not found"**
+**"Error generating release notes: 401"** — `AI_API_KEY` is missing or invalid.
 
-The persona name doesn't match any file in `personas/`. The error message lists available options. Use `list-personas` first to check names.
+**PR URL fetch returns "Pull request description unavailable"** — `GITHUB_TOKEN` is not set or lacks `repo` read access. Add it or paste the description directly.
 
-**"Error generating release notes: 401"**
+**Tools don't appear in your client** — Verify the path in `args` is absolute, `dist/mcp.js` exists, and you've restarted the client after config changes.
 
-`AI_API_KEY` is missing or invalid. Set it in your Claude Desktop `env` config.
-
-**PR URL fetch returns "Pull request description unavailable"**
-
-`GITHUB_TOKEN` is not set or doesn't have `repo` read access. Either add the token to your Claude Desktop config or paste the PR description directly.
-
-**The server doesn't appear in Claude Desktop**
-
-Verify the path in `args` is absolute and that `dist/mcp.js` exists. Quit and fully reopen Claude Desktop after any config change.
-
-**Output looks vague**
-
-Same root cause as the GitHub Action: vague PR descriptions produce vague notes. The MCP skill translates whatever it's given. Give it more specific input and the output sharpens. See [Engineering Process](setup.md#engineering-process).
+**Output looks vague** — Same cause as the Action: vague PR descriptions produce vague notes. Give it more specific input. See [Engineering Process](setup.md#engineering-process).
 
 ---
 
 ## Rebuilding After Changes
 
-If you update personas, voice, or config — no rebuild needed. Those files are read at call time.
+Personas, voice, config — no rebuild needed. Those files are read at call time.
 
-If you update action source code (`.ts` files), rebuild:
+Action source code (`.ts` files) — rebuild:
 
 ```bash
 cd action && npm run build
 ```
 
-Then restart Claude Desktop to pick up the new `dist/mcp.js`.
+Then restart your MCP client to pick up the new `dist/mcp.js`.

@@ -179,9 +179,9 @@ npm run build       # compile TypeScript to dist/
 
 ---
 
-## MCP Skill (Claude Desktop)
+## MCP Skill
 
-The same translation pipeline is available on demand inside Claude Desktop via the MCP skill. Useful for translating PRs before a merge, mid-review, or during standup prep — without waiting for CI.
+The same translation pipeline is available on demand inside any MCP-compatible client (Claude Desktop, opencode, Cursor, Zed, etc.). Useful for translating PRs before a merge, mid-review, or during standup prep — without waiting for CI.
 
 **Quick setup:**
 
@@ -208,6 +208,6 @@ Then add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. Ask: **"What personas does Legibly know about?"** to verify.
+Restart your client. Ask: **"What personas does Legibly know about?"** to verify.
 
 → [Full MCP guide](mcp.md)
