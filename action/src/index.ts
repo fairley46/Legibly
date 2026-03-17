@@ -12,7 +12,7 @@ function checkSecrets(providerType: string): void {
   if (needsApiKey && !process.env['AI_API_KEY']) {
     console.log(`AI_API_KEY secret is not set (required for provider: ${providerType}).`);
     console.log('Add it to your repo or org secrets under Settings > Secrets and variables > Actions.');
-    console.log('Skipping ShipSignal run.');
+    console.log('Skipping Legibly run.');
     process.exit(0);
   }
   if (providerType === 'github-copilot' && !process.env['GITHUB_TOKEN']) {
@@ -90,6 +90,6 @@ async function run(): Promise<void> {
 }
 
 run().catch(err => {
-  console.error('ShipSignal failed:', err instanceof Error ? err.message : err);
+  console.error('Legibly failed:', err instanceof Error ? err.message : err);
   process.exit(1);
 });

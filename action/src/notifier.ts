@@ -161,7 +161,7 @@ async function sendWebhook(note: GeneratedNote, config: WebhookNotifyConfig): Pr
     commit: (process.env['GH_SHA'] ?? 'unknown').slice(0, 8),
     branch: process.env['GH_REF_NAME'] ?? 'unknown',
     content: note.content,
-    generated_by: 'ShipSignal',
+    generated_by: 'Legibly',
   };
 
   const res = await fetch(url, {

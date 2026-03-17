@@ -1,6 +1,6 @@
 # Persona Template
 
-Use this file to define a new audience for ShipSignal. Copy it, rename it
+Use this file to define a new audience for Legibly. Copy it, rename it
 (e.g. `enterprise-admin.md`), and fill it in.
 
 The goal is not to describe a demographic. The goal is to make the person so

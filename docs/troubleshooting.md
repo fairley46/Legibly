@@ -19,10 +19,10 @@ Your `AI_API_KEY` secret is missing, expired, or set incorrectly. For GitHub Cop
 Check that `JIRA_BASE_URL`, `JIRA_USER_EMAIL`, and `JIRA_API_TOKEN` are all set. Verify commit messages reference ticket IDs matching the pattern `PROJ-123` where `PROJ` matches your `jira_project_key`. Jira errors are non-fatal. The run continues without ticket context rather than failing.
 
 **Bot commit fails with `refusing to allow... without workflow scope`**
-The `GITHUB_TOKEN` in your Actions environment doesn't have permission to push to a protected branch. Either loosen branch protection rules to allow the ShipSignal bot, or set the workflow to write to a separate branch.
+The `GITHUB_TOKEN` in your Actions environment doesn't have permission to push to a protected branch. Either loosen branch protection rules to allow the Legibly bot, or set the workflow to write to a separate branch.
 
 **Output is vague or missing metrics**
-The quality of generated notes depends on the quality of inputs. ShipSignal translates what it's given — it cannot invent specifics that aren't in the PR description or commit messages. See [Engineering Process](setup.md#engineering-process) for a checklist and before/after examples of what makes a difference.
+The quality of generated notes depends on the quality of inputs. Legibly translates what it's given — it cannot invent specifics that aren't in the PR description or commit messages. See [Engineering Process](setup.md#engineering-process) for a checklist and before/after examples of what makes a difference.
 
 **Notification workflow runs but nothing is sent**
 Either there's no `notify` block in `team-config.yml` for that environment, or the persona name in the workflow input doesn't match any note file in `release-notes/{environment}/`. Check that the file exists and that the persona name matches exactly.
@@ -34,4 +34,4 @@ Confirm the webhook URL secret is set in your repo and uncommented in the `env:`
 The API token doesn't have permission to edit the target page. Confirm the token belongs to a user with edit access to that specific page. Confluence space permissions and page-level restrictions are evaluated separately.
 
 **Confluence update failing with 409**
-A version conflict. The page was updated between ShipSignal's GET and PUT. Re-run the notification workflow; it will fetch the current version and retry cleanly.
+A version conflict. The page was updated between Legibly's GET and PUT. Re-run the notification workflow; it will fetch the current version and retry cleanly.

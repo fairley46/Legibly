@@ -1,6 +1,6 @@
 # End-to-End Example
 
-A payments engineering team sets up ShipSignal and pushes to production.
+A payments engineering team sets up Legibly and pushes to production.
 This is everything that happens — from configuration to commit to generated output.
 
 ---
@@ -54,7 +54,7 @@ ai_provider:
   model: claude-sonnet-4-6
 ```
 
-That's the entire configuration. When they push to `main`, ShipSignal generates
+That's the entire configuration. When they push to `main`, Legibly generates
 three notes — one for each persona listed under `production` — all written in
 The Operator voice.
 
@@ -106,7 +106,7 @@ PAY-2156 [Medium] Export UI blocks while file generates
 
 ---
 
-## Step 4 — ShipSignal Fires
+## Step 4 — Legibly Fires
 
 The GitHub Action triggers on the merge to `main`. It reads the config, detects
 the `production` environment, and queues one AI call per configured persona:
@@ -163,7 +163,7 @@ environment: production
 persona: customer
 commit: a3f7b2c1
 branch: main
-generated_by: ShipSignal
+generated_by: Legibly
 ---
 
 ## What's new — March 16, 2026

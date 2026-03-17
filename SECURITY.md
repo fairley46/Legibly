@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ShipSignal, please report it responsibly.
+If you discover a security vulnerability in Legibly, please report it responsibly.
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
@@ -36,6 +36,6 @@ commit unless you prefer to remain anonymous.
 
 ## Scope
 
-This policy applies to the ShipSignal GitHub Action and its supporting code.
+This policy applies to the Legibly GitHub Action and its supporting code.
 It does not cover third-party AI providers (Anthropic, OpenAI) or Jira — report
 vulnerabilities in those services directly to their respective security teams.

@@ -30,7 +30,7 @@ labels: bug
 
 - AI provider: <!-- e.g., Anthropic Claude, OpenAI, GitHub Copilot Enterprise -->
 - Node.js version: <!-- e.g., 20.11.0 -->
-- ShipSignal version / commit:
+- Legibly version / commit:
 
 ## Logs or error output
 

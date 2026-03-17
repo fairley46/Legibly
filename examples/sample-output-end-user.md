@@ -4,7 +4,7 @@ environment: production
 persona: end-user
 commit: a3f7b2c1
 branch: main
-generated_by: ShipSignal
+generated_by: Legibly
 ---
 
 ## What's New — March 16, 2026

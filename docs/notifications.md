@@ -2,9 +2,9 @@
 
 ## Output
 
-**By default, ShipSignal does one thing: it commits markdown files to your repo.**
+**By default, Legibly does one thing: it commits markdown files to your repo.**
 
-On every merge or push to a configured branch, the `release-notes.yml` workflow runs automatically, generates notes for each persona, and commits them back to the repo as a `ShipSignal[bot]` commit. No manual step required. The committed markdown is the primary output. Everything else (notifications, downstream tooling) is optional and built on top of it.
+On every merge or push to a configured branch, the `release-notes.yml` workflow runs automatically, generates notes for each persona, and commits them back to the repo as a `Legibly[bot]` commit. No manual step required. The committed markdown is the primary output. Everything else (notifications, downstream tooling) is optional and built on top of it.
 
 Generated files land in:
 
@@ -29,15 +29,15 @@ environment: production
 persona: customer
 commit: a3f7b2c1
 branch: main
-generated_by: ShipSignal
+generated_by: Legibly
 ---
 ```
 
-If a push contains no user-visible changes (pure internal refactor, dependency bumps with no impact), ShipSignal skips file generation for that run.
+If a push contains no user-visible changes (pure internal refactor, dependency bumps with no impact), Legibly skips file generation for that run.
 
 **File retention**
 
-By default ShipSignal keeps the 50 most recent files per persona per environment folder. After each write it scans the folder, sorts files oldest-first (the `YYYY-MM-DD` prefix makes this free), and deletes anything beyond the limit. Git history preserves deleted files.
+By default Legibly keeps the 50 most recent files per persona per environment folder. After each write it scans the folder, sorts files oldest-first (the `YYYY-MM-DD` prefix makes this free), and deletes anything beyond the limit. Git history preserves deleted files.
 
 Configure this with `max_files_per_persona` in the `output` block:
 
@@ -157,7 +157,7 @@ notify:
 
 ### Confluence
 
-Appends the release note to an existing Confluence page, prepended at the top (newest-first). The page must already exist. ShipSignal updates it, it does not create it.
+Appends the release note to an existing Confluence page, prepended at the top (newest-first). The page must already exist. Legibly updates it, it does not create it.
 
 **Setup:**
 
@@ -181,7 +181,7 @@ notify:
 
 ### Custom webhook
 
-A generic HTTP POST that covers email relays, Zapier, Make, and any custom endpoint. ShipSignal sends a standard JSON payload:
+A generic HTTP POST that covers email relays, Zapier, Make, and any custom endpoint. Legibly sends a standard JSON payload:
 
 ```json
 {
@@ -191,7 +191,7 @@ A generic HTTP POST that covers email relays, Zapier, Make, and any custom endpo
   "commit": "a3f7b2c1",
   "branch": "main",
   "content": "## What's new...",
-  "generated_by": "ShipSignal"
+  "generated_by": "Legibly"
 }
 ```
 
@@ -207,7 +207,7 @@ notify:
       url: $EMAIL_RELAY_WEBHOOK
       headers:
         Authorization: Bearer $EMAIL_RELAY_TOKEN
-        X-Source: ShipSignal
+        X-Source: Legibly
 ```
 
 All header values are also resolved from environment variables when prefixed with `$`.

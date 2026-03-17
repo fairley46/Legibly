@@ -1,6 +1,6 @@
-# ShipSignal Voice Library
+# Legibly Voice Library
 
-Sample brand voices for ShipSignal. Each voice file is a drop-in replacement for
+Sample brand voices for Legibly. Each voice file is a drop-in replacement for
 `config/voice.md` — or a starting point to blend with your own.
 
 Pick one that fits your brand. Edit it freely. Or mix elements from multiple voices

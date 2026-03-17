@@ -61,13 +61,13 @@ Go to **Settings > Secrets and variables > Actions** in your repo and add:
 | `JIRA_USER_EMAIL` | Optional | Email address associated with your Jira account |
 | `JIRA_API_TOKEN` | Optional | Jira API token, generate one at [id.atlassian.com](https://id.atlassian.com/manage-profile/security/api-tokens) |
 
-ShipSignal works without Jira. If the secrets aren't set, it skips ticket enrichment and generates notes from the git diff and commit messages alone.
+Legibly works without Jira. If the secrets aren't set, it skips ticket enrichment and generates notes from the git diff and commit messages alone.
 
 The workflow requires these permissions (already set in the workflow file, no action needed):
 - `contents: write`: commit generated notes back to the repo
 - `pull-requests: read`: read PR descriptions
 
-If your repo has branch protection on `main`, you'll need to allow the ShipSignal bot to bypass it, or configure a dedicated bot token with write access.
+If your repo has branch protection on `main`, you'll need to allow the Legibly bot to bypass it, or configure a dedicated bot token with write access.
 
 **Secret management options:**
 
@@ -93,7 +93,7 @@ This file is owned by the product team. No engineering changes needed to update 
 
 ## You're set
 
-Push to a configured branch. ShipSignal will generate a release note for each persona in that deploy point and commit the files to `release-notes/{environment}/` automatically. No further action required.
+Push to a configured branch. Legibly will generate a release note for each persona in that deploy point and commit the files to `release-notes/{environment}/` automatically. No further action required.
 
 Before your first merge, read [Engineering Process](#engineering-process). The quality of generated notes depends entirely on what your team puts into PR descriptions and commit messages. Two minutes there will pay off on every deploy.
 
@@ -103,13 +103,13 @@ To optionally send those notes to Slack, Teams, Confluence, or a webhook, see [d
 
 ## Engineering Process
 
-ShipSignal's output quality is entirely dependent on what goes into PRs and commits. The AI translates your inputs — it cannot invent specifics that aren't there.
+Legibly's output quality is entirely dependent on what goes into PRs and commits. The AI translates your inputs — it cannot invent specifics that aren't there.
 
 ### PR descriptions are the main input
 
-ShipSignal reads the PR description first. If the description is vague, the notes will be vague.
+Legibly reads the PR description first. If the description is vague, the notes will be vague.
 
-| PR description | What ShipSignal generates |
+| PR description | What Legibly generates |
 |---|---|
 | `fixes stuff` | Vague, unusable notes |
 | `Resolved a session timeout bug causing users to be logged out after 30 min of inactivity` | Sharp, specific notes for every persona |
@@ -118,16 +118,16 @@ Signal doesn't need to be polished. It needs to be specific.
 
 ### Commit messages fill the gaps
 
-ShipSignal reads the last 20 commit messages. They supplement the PR description, especially when a PR contains multiple distinct changes.
+Legibly reads the last 20 commit messages. They supplement the PR description, especially when a PR contains multiple distinct changes.
 
-| Commit message | Value to ShipSignal |
+| Commit message | Value to Legibly |
 |---|---|
 | `fix auth bug` | Nothing useful |
 | `fix JWT expiry not refreshing on mobile after background resume` | Translatable — audience, symptom, trigger all present |
 
-### What ShipSignal does not do
+### What Legibly does not do
 
-ShipSignal does not review code, validate accuracy, or verify that what was described actually shipped. It trusts the inputs and translates them. Wrong inputs produce wrong notes — just in cleaner language. The engineer is responsible for what goes into the PR.
+Legibly does not review code, validate accuracy, or verify that what was described actually shipped. It trusts the inputs and translates them. Wrong inputs produce wrong notes — just in cleaner language. The engineer is responsible for what goes into the PR.
 
 ### Short checklist
 
@@ -160,7 +160,7 @@ npm install
 npm run dev
 ```
 
-`DRY_RUN=true` is set in `.env.local.example` by default. ShipSignal will generate notes and print them to your terminal without writing any files or committing anything.
+`DRY_RUN=true` is set in `.env.local.example` by default. Legibly will generate notes and print them to your terminal without writing any files or committing anything.
 
 **Other useful commands:**
 

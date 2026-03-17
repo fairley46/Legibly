@@ -1,10 +1,10 @@
-# ShipSignal
+# Legibly
 
-![CI](https://github.com/fairley46/ShipSignal/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/fairley46/Legibly/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node.js >=20](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
 
-> A GitHub Action that reads every merge, generates audience-specific release notes using AI, and commits them to your repo automatically. No manual writing. No communication gap.
+> A GitHub Action that reads every merge and generates audience-specific plain language notes automatically — committed back to your repo on every PR.
 
 ---
 
@@ -12,7 +12,7 @@
 
 - [See It in Action](#see-it-in-action)
 - [The Problem](#the-problem)
-- [What ShipSignal Does](#what-shipsignal-does)
+- [What Legibly Does](#what-legibly-does)
 - [How It Works](#how-it-works)
 - [Repo layout](#repo-layout)
 - [End-to-End Example](#end-to-end-example)
@@ -30,15 +30,15 @@
 > Async validation pipeline reduces p99 checkout from 4.1s to 0.8s. Export jobs
 > backgrounded to worker queue."
 
-**What ShipSignal generated for the VP:**
+**What Legibly generated for the VP:**
 > "Checkout reliability incident resolved. p99 latency down 80% to under a second.
 > A potential double-charge bug was caught and fixed before customer impact."
 
-**What ShipSignal generated for the customer:**
+**What Legibly generated for the customer:**
 > "Checkout is fast now — under a second. Exports no longer block your browser.
 > We fixed a bug that could charge you twice. Nothing you need to do."
 
-**What ShipSignal generated for the technical user:**
+**What Legibly generated for the technical user:**
 > "Payment lock TTL extended 3s → 8s (resolves race under high concurrency). Async
 > validation pipeline: p99 4.1s → 0.8s. Export jobs moved to worker queue — no longer
 > blocking the request thread. No API or schema changes."
@@ -51,15 +51,15 @@ Same commit. Three different notes. Each one says exactly what that audience nee
 
 Engineers are shipping at a pace that didn't exist two years ago. A single agentic session can produce what used to take a sprint. But the communication layer hasn't kept up. Product owners still spend hours manually reading PRs, decoding commit messages, and translating technical changes into language that customers can understand. That's not a scalable job. The result: enormous engineering value that never gets communicated. Customers don't know what changed. Stakeholders can't see the progress.
 
-**ShipSignal closes that gap.** It automates the translation from technical work to customer value, so the communication layer moves at the speed of code.
+**Legibly closes that gap.** It automates the translation from technical work to customer value, so the communication layer moves at the speed of code.
 
 → [The data behind this problem](docs/overview.md)
 
 ---
 
-## What ShipSignal Does
+## What Legibly Does
 
-On every merge or push, ShipSignal:
+On every merge or push, Legibly:
 
 1. Reads the git diff, commit messages, and PR description
 2. Pulls linked Jira ticket context (optional, works without Jira)
@@ -69,7 +69,7 @@ On every merge or push, ShipSignal:
 
 That's the automatic path — it always runs, no action needed. A second path exists for teams that want to push notes further: once the markdown is committed, an engineer reads it and manually triggers the notification workflow to send to Slack, Teams, Confluence, or a webhook. AI-generated content is never sent automatically.
 
-**Note on output quality:** ShipSignal translates what it's given. The quality of generated notes is directly proportional to the quality of PR descriptions and commit messages. See [Engineering Process](docs/setup.md#engineering-process) for what to write and why it matters.
+**Note on output quality:** Legibly translates what it's given. The quality of generated notes is directly proportional to the quality of PR descriptions and commit messages. See [Engineering Process](docs/setup.md#engineering-process) for what to write and why it matters.
 
 The product owner's job shifts from **writing** to **talking to customers**. The communication still happens. It just doesn't require a human to produce it.
 
@@ -118,9 +118,9 @@ The automatic path (merge → generate → commit) runs on every push with no ac
 | `voices/` | Pre-built brand voice styles. Copy one to `config/voice.md` to get started. |
 | `config/` | Your `team-config.yml` (deploy points, AI provider) and `voice.md` (brand voice) live here. |
 | `examples/` | Sample config and a full end-to-end walkthrough. Start here. |
-| `release-notes/` | Where ShipSignal commits generated markdown. Organised by environment. |
+| `release-notes/` | Where Legibly commits generated markdown. Organised by environment. |
 | `action/` | The GitHub Action source code (TypeScript). You don't need to touch this. |
-| `prompts/` | The AI prompt templates ShipSignal uses internally. |
+| `prompts/` | The AI prompt templates Legibly uses internally. |
 
 ---
 
@@ -131,7 +131,7 @@ See [`examples/e2e-example.md`](examples/e2e-example.md) for a complete walkthro
 1. A team picks The Operator voice and copies it to `config/voice.md`
 2. They configure deploy points: which branches, which environments, which personas
 3. An engineer merges three commits to `main`
-4. ShipSignal reads the commits, PR description, and Jira tickets and extracts the value signals
+4. Legibly reads the commits, PR description, and Jira tickets and extracts the value signals
 5. Three notes are generated and committed, one per configured persona
 
 The final section shows the gap side-by-side: what the engineer wrote vs. what each
@@ -152,11 +152,11 @@ cp examples/sample-team-config.yml config/team-config.yml
 # 3. Set your team name, AI provider, and deploy points (branches → personas)
 
 # 4. Add your AI provider key to GitHub Actions secrets (AI_API_KEY)
-#    Jira secrets are optional — ShipSignal works without them
+#    Jira secrets are optional — Legibly works without them
 
 # 5. Test locally before pushing (see Local Development)
 
-# 6. Push to a configured branch — ShipSignal runs automatically
+# 6. Push to a configured branch — Legibly runs automatically
 ```
 
 See the [Setup Guide](docs/setup.md) for full configuration details.
@@ -165,7 +165,7 @@ See the [Setup Guide](docs/setup.md) for full configuration details.
 
 ## Personas
 
-Personas are the core of ShipSignal. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience: who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
+Personas are the core of Legibly. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience: who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
 
 **No code changes are needed to manage personas.** Add a file, edit a file, delete a file.
 
@@ -191,7 +191,7 @@ Your brand voice is a single file, `config/voice.md`, that applies universally t
 
 ### Pre-built voices
 
-ShipSignal ships with six voices, each tuned for a different brand personality. Pick the one that sounds like you, copy it to `config/voice.md`, and you're set.
+Legibly ships with six voices, each tuned for a different brand personality. Pick the one that sounds like you, copy it to `config/voice.md`, and you're set.
 
 | File | Voice | Style | Best for | Sample line |
 |---|---|---|---|---|

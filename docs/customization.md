@@ -2,7 +2,7 @@
 
 ## Personas
 
-Personas are the core of ShipSignal. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience: who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
+Personas are the core of Legibly. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience: who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
 
 **No code changes are needed to manage personas.** Add a file, edit a file, delete a file.
 
@@ -79,7 +79,7 @@ You have two options: start from a pre-built voice and get running today, or bui
 
 ### Use a pre-built voice
 
-ShipSignal ships with six voices, each tuned for a different brand personality. Pick the one that sounds like you, copy it to `config/voice.md`, and you're set. Edit them freely. They're starting points, not rules.
+Legibly ships with six voices, each tuned for a different brand personality. Pick the one that sounds like you, copy it to `config/voice.md`, and you're set. Edit them freely. They're starting points, not rules.
 
 | File | Voice | Style | Best for | Sample line |
 |---|---|---|---|---|

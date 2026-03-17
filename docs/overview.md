@@ -1,4 +1,4 @@
-# The Problem ShipSignal Solves
+# The Problem Legibly Solves
 
 ## Engineering velocity has escaped communication capacity
 
@@ -52,9 +52,9 @@ The communication bottleneck isn't just a productivity problem. It's the mechani
 
 ---
 
-## ShipSignal's answer
+## Legibly's answer
 
-ShipSignal automates the translation layer. On every merge, it reads the diff and commit context, extracts the value signal, and generates audience-specific release notes for each configured persona — committed to your repo automatically. No manual writing. No communication gap. See the [README](../README.md) for how it works, configuration details, and quick start.
+Legibly automates the translation layer. On every merge, it reads the diff and commit context, extracts the value signal, and generates audience-specific release notes for each configured persona — committed to your repo automatically. No manual writing. No communication gap. See the [README](../README.md) for how it works, configuration details, and quick start.
 
 ---
 

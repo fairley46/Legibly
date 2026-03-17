@@ -6,8 +6,8 @@ import yaml from 'js-yaml';
 import type { TeamConfig, NotifyConfig } from './types.js';
 
 function getRepoRoot(): string {
-  if (process.env['SHIPSIGNAL_REPO_ROOT']) {
-    return process.env['SHIPSIGNAL_REPO_ROOT'];
+  if (process.env['LEGIBLY_REPO_ROOT']) {
+    return process.env['LEGIBLY_REPO_ROOT'];
   }
   try {
     return execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();

@@ -1,6 +1,6 @@
-# Contributing to ShipSignal
+# Contributing to Legibly
 
-Thanks for your interest in improving ShipSignal. There are three ways to contribute —
+Thanks for your interest in improving Legibly. There are three ways to contribute —
 and two of them require no code at all.
 
 ---
