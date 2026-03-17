@@ -1,4 +1,6 @@
-# Legibly
+<p align="center">
+  <img src="docs/logo.png" alt="Legibly" width="420">
+</p>
 
 ![CI](https://github.com/fairley46/Legibly/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
