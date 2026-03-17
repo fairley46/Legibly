@@ -53,6 +53,8 @@ Engineers are shipping at a pace that didn't exist two years ago. A single agent
 
 **ShipSignal closes that gap.** It automates the translation from technical work to customer value, so the communication layer moves at the speed of code.
 
+→ [The data behind this problem](docs/overview.md)
+
 ---
 
 ## What ShipSignal Does
@@ -111,7 +113,7 @@ The automatic path (merge → generate → commit) runs on every push with no ac
 
 | Folder / file | What it is |
 |---|---|
-| `docs/` | Setup guide, customization, notifications, and troubleshooting. |
+| `docs/` | Problem overview, setup guide, customization, notifications, and troubleshooting. |
 | `personas/` | One markdown file per audience. Add, edit, or remove — no code changes needed. |
 | `voices/` | Pre-built brand voice styles. Copy one to `config/voice.md` to get started. |
 | `config/` | Your `team-config.yml` (deploy points, AI provider) and `voice.md` (brand voice) live here. |
@@ -206,6 +208,7 @@ For instructions on building a custom voice from scratch, see [docs/customizatio
 
 ## Docs
 
+- [docs/overview.md](docs/overview.md) — Industry context: the gap between engineering velocity and communication capacity
 - [docs/setup.md](docs/setup.md) — Setup Guide, Engineering Process, Local Development
 - [docs/customization.md](docs/customization.md) — Personas and Brand Voice customization
 - [docs/notifications.md](docs/notifications.md) — Output, Manual Runs, Notifications (Slack, Teams, Confluence, Webhook)
