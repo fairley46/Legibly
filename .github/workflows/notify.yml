@@ -1,0 +1,76 @@
+name: Send Notifications
+
+# Manually triggered after reviewing committed release notes.
+#
+# Workflow:
+#   1. Merge a PR → release-notes.yml commits markdown files automatically
+#   2. Read the committed files in release-notes/{environment}/
+#   3. When satisfied, go to Actions → "Send Notifications" → Run workflow
+#
+# The manual trigger IS the review step — AI-generated content is never sent
+# without an engineer explicitly approving it here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to notify for (e.g. production, staging, hotfix)'
+        required: true
+        type: string
+      persona:
+        description: 'Persona name to notify, or * for all personas in that deploy point'
+        required: false
+        default: '*'
+        type: string
+
+jobs:
+  notify:
+    name: Send notifications
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: action/package-lock.json
+
+      - name: Install dependencies
+        working-directory: action
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: action
+        run: npm run build
+
+      - name: Send notifications
+        working-directory: action
+        env:
+          NOTIFY_ENVIRONMENT: ${{ github.event.inputs.environment }}
+          NOTIFY_PERSONA: ${{ github.event.inputs.persona }}
+          GH_SHA: ${{ github.sha }}
+          GH_REF_NAME: ${{ github.ref_name }}
+          # --- Add your integration secrets below ---
+          # Each value in team-config.yml prefixed with $ is resolved from these env vars.
+          #
+          # Example: if your config has webhook_url: $SLACK_CUSTOMER_WEBHOOK
+          # add: SLACK_CUSTOMER_WEBHOOK: ${{ secrets.SLACK_CUSTOMER_WEBHOOK }}
+          #
+          # Slack / Teams
+          # SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          # TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+          #
+          # Confluence
+          # CONFLUENCE_USER: ${{ secrets.CONFLUENCE_USER }}
+          # CONFLUENCE_TOKEN: ${{ secrets.CONFLUENCE_TOKEN }}
+          #
+          # Generic webhook (email relay, Zapier, etc.)
+          # WEBHOOK_AUTH_TOKEN: ${{ secrets.WEBHOOK_AUTH_TOKEN }}
+        run: node dist/notify.js

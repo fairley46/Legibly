@@ -3,7 +3,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import yaml from 'js-yaml';
-import type { TeamConfig } from './types.js';
+import type { TeamConfig, NotifyConfig } from './types.js';
 
 function getRepoRoot(): string {
   if (process.env['SHIPSIGNAL_REPO_ROOT']) {
@@ -53,9 +53,75 @@ export async function loadConfig(): Promise<TeamConfig> {
     );
   }
 
+  for (const dp of config.deploy_points) {
+    if (dp.notify) {
+      validateNotifyConfigs(dp.notify, dp.environment);
+    }
+  }
+
   if (config.team?.jira_project_key) {
     process.env['JIRA_PROJECT_KEY'] = config.team.jira_project_key;
   }
 
   return config;
+}
+
+function validateNotifyConfigs(
+  notify: Record<string, NotifyConfig[]>,
+  environment: string
+): void {
+  for (const [persona, configs] of Object.entries(notify)) {
+    if (!Array.isArray(configs)) {
+      console.warn(
+        `Warning: notify["${persona}"] in deploy_point "${environment}" must be an array. Skipping.`
+      );
+      continue;
+    }
+
+    for (const cfg of configs) {
+      if (!cfg || typeof cfg !== 'object' || !('type' in cfg)) {
+        console.warn(
+          `Warning: invalid notify config for persona "${persona}" in "${environment}". Each entry must have a "type" field.`
+        );
+        continue;
+      }
+
+      switch (cfg.type) {
+        case 'slack':
+          if (!cfg.webhook_url) {
+            console.warn(
+              `Warning: slack notify config for "${persona}" in "${environment}" is missing "webhook_url".`
+            );
+          }
+          break;
+        case 'teams':
+          if (!cfg.webhook_url) {
+            console.warn(
+              `Warning: teams notify config for "${persona}" in "${environment}" is missing "webhook_url".`
+            );
+          }
+          break;
+        case 'confluence':
+          if (!cfg.base_url || !cfg.page_id || !cfg.username_secret || !cfg.token_secret) {
+            console.warn(
+              `Warning: confluence notify config for "${persona}" in "${environment}" is missing required fields (base_url, page_id, username_secret, token_secret).`
+            );
+          }
+          break;
+        case 'webhook':
+          if (!cfg.url) {
+            console.warn(
+              `Warning: webhook notify config for "${persona}" in "${environment}" is missing "url".`
+            );
+          }
+          break;
+        default: {
+          const unknown = cfg as { type: string };
+          console.warn(
+            `Warning: unknown notify type "${unknown.type}" for persona "${persona}" in "${environment}". Supported: slack, teams, confluence, webhook.`
+          );
+        }
+      }
+    }
+  }
 }

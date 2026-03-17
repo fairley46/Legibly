@@ -10,11 +10,42 @@ export interface TeamConfig {
   output?: OutputConfig;
 }
 
+export interface SlackNotifyConfig {
+  type: 'slack';
+  webhook_url: string;
+}
+
+export interface TeamsNotifyConfig {
+  type: 'teams';
+  webhook_url: string;
+}
+
+export interface ConfluenceNotifyConfig {
+  type: 'confluence';
+  base_url: string;
+  page_id: string;
+  username_secret: string;
+  token_secret: string;
+}
+
+export interface WebhookNotifyConfig {
+  type: 'webhook';
+  url: string;
+  headers?: Record<string, string>;
+}
+
+export type NotifyConfig =
+  | SlackNotifyConfig
+  | TeamsNotifyConfig
+  | ConfluenceNotifyConfig
+  | WebhookNotifyConfig;
+
 export interface DeployPoint {
   environment: string;
   branch_pattern: string;
   description?: string;
   personas: string[];
+  notify?: Record<string, NotifyConfig[]>;
 }
 
 export interface AIProviderConfig {

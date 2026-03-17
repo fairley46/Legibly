@@ -13,6 +13,30 @@ deploy_points:
       - vp
       - customer
       - partner
+    # notify: optional. Triggers when you manually run the "Send Notifications" workflow.
+    # Keys are persona names or "*" (wildcard = all personas in this deploy point).
+    # Values are arrays — a single persona can fan out to multiple channels.
+    # Values starting with $ are resolved from environment variables at runtime;
+    # add the corresponding secrets to the notify.yml workflow env block.
+    #
+    # notify:
+    #   customer:
+    #     - type: slack
+    #       webhook_url: $SLACK_CUSTOMER_WEBHOOK
+    #   vp:
+    #     - type: webhook
+    #       url: $EMAIL_RELAY_WEBHOOK
+    #       headers:
+    #         Authorization: Bearer $EMAIL_RELAY_TOKEN
+    #   partner:
+    #     - type: teams
+    #       webhook_url: $TEAMS_PARTNER_WEBHOOK
+    #   "*":
+    #     - type: confluence
+    #       base_url: https://yourco.atlassian.net/wiki
+    #       page_id: "98765432"
+    #       username_secret: CONFLUENCE_USER    # name of the env var, not the value
+    #       token_secret: CONFLUENCE_TOKEN      # name of the env var, not the value
 
   - environment: staging
     branch_pattern: "release/*"
