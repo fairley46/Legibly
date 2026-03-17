@@ -1,0 +1,178 @@
+# Setup Guide
+
+## Step 1: Configure your team
+
+Copy the sample config:
+
+```bash
+cp examples/sample-team-config.yml config/team-config.yml
+```
+
+Set your team name and Jira project key:
+
+```yaml
+team:
+  name: "Platform Team"
+  jira_project_key: "PLAT"
+```
+
+Configure your deploy points: which branches map to which environments, and which personas fire for each:
+
+```yaml
+deploy_points:
+  - environment: production
+    branch_pattern: "main"
+    personas: [vp, customer, partner]
+
+  - environment: staging
+    branch_pattern: "release/*"
+    personas: [internal, technical-user]
+```
+
+---
+
+## Step 2: Choose your AI provider
+
+Set `ai_provider.type` in `team-config.yml`:
+
+| Provider | `type` value | Secret required |
+|---|---|---|
+| Anthropic | `anthropic` | `AI_API_KEY` |
+| GitHub Copilot Enterprise | `github-copilot` | `GITHUB_TOKEN` with Copilot API access |
+| OpenAI | `openai` | `AI_API_KEY` |
+| Azure OpenAI | `azure-openai` | `AI_API_KEY` + `azure_endpoint` + `azure_deployment` |
+
+```yaml
+ai_provider:
+  type: anthropic
+  model: claude-sonnet-4-6
+```
+
+---
+
+## Step 3: Add secrets
+
+Go to **Settings > Secrets and variables > Actions** in your repo and add:
+
+| Secret | Required | Description |
+|---|---|---|
+| `AI_API_KEY` | Yes (unless using GitHub Copilot) | Your AI provider API key |
+| `JIRA_BASE_URL` | Optional | Your Jira instance URL, e.g. `https://yourorg.atlassian.net` |
+| `JIRA_USER_EMAIL` | Optional | Email address associated with your Jira account |
+| `JIRA_API_TOKEN` | Optional | Jira API token, generate one at [id.atlassian.com](https://id.atlassian.com/manage-profile/security/api-tokens) |
+
+ShipSignal works without Jira. If the secrets aren't set, it skips ticket enrichment and generates notes from the git diff and commit messages alone.
+
+The workflow requires these permissions (already set in the workflow file, no action needed):
+- `contents: write`: commit generated notes back to the repo
+- `pull-requests: read`: read PR descriptions
+
+If your repo has branch protection on `main`, you'll need to allow the ShipSignal bot to bypass it, or configure a dedicated bot token with write access.
+
+**Secret management options:**
+
+- **Repo-level**: Settings > Secrets and variables > Actions (default)
+- **Org-level**: Org Settings > Secrets. Set once, inherited by all repos. Best for org-wide rollouts.
+- **Environments**: scope secrets to specific environments (production vs staging) with optional approval gates
+- **External**: HashiCorp Vault, AWS Secrets Manager, Azure Key Vault, for teams with existing secret management infrastructure
+
+---
+
+## Step 4: Customize your voice
+
+Open `config/voice.md` and update it to match your brand. This file defines:
+
+- Core writing principles (lead with value, active voice, specificity)
+- Banned phrases (no "leverages", no "seamless", no "game-changing")
+- Formatting rules
+- How to handle metrics, security fixes, and sensitive information
+
+This file is owned by the product team. No engineering changes needed to update it.
+
+---
+
+## You're set
+
+Push to a configured branch. ShipSignal will generate a release note for each persona in that deploy point and commit the files to `release-notes/{environment}/` automatically. No further action required.
+
+Before your first merge, read [Engineering Process](#engineering-process). The quality of generated notes depends entirely on what your team puts into PR descriptions and commit messages. Two minutes there will pay off on every deploy.
+
+To optionally send those notes to Slack, Teams, Confluence, or a webhook, see [docs/notifications.md](notifications.md).
+
+---
+
+## Engineering Process
+
+ShipSignal's output quality is entirely dependent on what goes into PRs and commits. The AI translates your inputs — it cannot invent specifics that aren't there.
+
+### PR descriptions are the main input
+
+ShipSignal reads the PR description first. If the description is vague, the notes will be vague.
+
+| PR description | What ShipSignal generates |
+|---|---|
+| `fixes stuff` | Vague, unusable notes |
+| `Resolved a session timeout bug causing users to be logged out after 30 min of inactivity` | Sharp, specific notes for every persona |
+
+Signal doesn't need to be polished. It needs to be specific.
+
+### Commit messages fill the gaps
+
+ShipSignal reads the last 20 commit messages. They supplement the PR description, especially when a PR contains multiple distinct changes.
+
+| Commit message | Value to ShipSignal |
+|---|---|
+| `fix auth bug` | Nothing useful |
+| `fix JWT expiry not refreshing on mobile after background resume` | Translatable — audience, symptom, trigger all present |
+
+### What ShipSignal does not do
+
+ShipSignal does not review code, validate accuracy, or verify that what was described actually shipped. It trusts the inputs and translates them. Wrong inputs produce wrong notes — just in cleaner language. The engineer is responsible for what goes into the PR.
+
+### Short checklist
+
+Before merging:
+
+- [ ] PR title names the user-facing change, not the implementation (`Fix session timeout on mobile` not `Update JWT refresh handler`)
+- [ ] PR description has 2–3 sentences: what changed, why it matters, who it affects
+- [ ] Commit messages reference what broke or improved, not just what file was touched
+
+Teams that follow this consistently get release notes that could be sent directly to customers. Teams that don't get notes that need editing.
+
+---
+
+## Local Development
+
+Test your configuration and personas locally before pushing to CI.
+
+**Setup:**
+
+```bash
+cp .env.local.example .env.local
+# Fill in your values — at minimum set AI_API_KEY and DEPLOY_ENVIRONMENT
+```
+
+**Run:**
+
+```bash
+cd action
+npm install
+npm run dev
+```
+
+`DRY_RUN=true` is set in `.env.local.example` by default. ShipSignal will generate notes and print them to your terminal without writing any files or committing anything.
+
+**Other useful commands:**
+
+```bash
+npm run typecheck   # type-check without building
+npm run lint        # run ESLint
+npm run build       # compile TypeScript to dist/
+```
+
+**Testing a new persona locally:**
+
+1. Create your persona file in `personas/`
+2. Add it to `deploy_points[].personas` in `config/team-config.yml`
+3. Set `PERSONA_OVERRIDE=your-persona-name` in `.env.local`
+4. Run `npm run dev` and review the output before pushing
