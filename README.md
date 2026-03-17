@@ -387,6 +387,10 @@ Update `config/voice.md` whenever your brand voice evolves, a new communications
 
 ## Output
 
+**By default, ShipSignal does one thing: it commits markdown files to your repo.**
+
+On every merge or push to a configured branch, the `release-notes.yml` workflow runs automatically, generates notes for each persona, and commits them back to the repo as a `ShipSignal[bot]` commit. No manual step required. The committed markdown is the primary output — everything else (notifications, downstream tooling) is optional and built on top of it.
+
 Generated files land in:
 
 ```
@@ -415,6 +419,8 @@ generated_by: ShipSignal
 ```
 
 If a push contains no user-visible changes — pure internal refactor, dependency bumps with no impact — ShipSignal skips file generation for that run.
+
+To send these notes to Slack, Teams, Confluence, or a custom endpoint, see [Notifications](#notifications). That step is always manual — you read the committed files first, then decide to send.
 
 ---
 
