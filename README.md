@@ -6,7 +6,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node.js >=20](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
 
-> A GitHub Action that reads every merge and generates audience-specific plain language notes automatically, committed back to your repo on every PR.
+> Reads every merge and generates audience-specific plain language notes automatically, committed back to your repo on every push. Works on GitHub Actions, GitLab CI, Bitbucket Pipelines, and any other CI system.
 
 ---
 
@@ -19,6 +19,7 @@
 - [Repo layout](#repo-layout)
 - [End-to-End Example](#end-to-end-example)
 - [Quick Start](#quick-start)
+- [CI Platforms](#ci-platforms)
 - [Personas](#personas)
 - [Brand Voice](#brand-voice)
 - [License](#license)
@@ -84,9 +85,9 @@ The product owner's job shifts from **writing** to **talking to customers**. The
 ```
 merge / push to configured branch
         ↓
-GitHub Action fires automatically
+CI pipeline fires (GitHub Actions, GitLab CI, Bitbucket, or any CI)
         ↓
-reads: git diff + commits + PR description + Jira tickets (optional)
+reads: git diff + commits + PR/MR description + Jira tickets (optional)
         ↓
 AI extracts value signals (metrics, changes, fixes, improvements)
         ↓
@@ -98,7 +99,7 @@ commits markdown files to release-notes/{environment}/    ← always, no action 
         ↓
 engineer reads the committed markdown files
         ↓
-Actions → "Send Notifications" → Run workflow → pick environment + persona
+trigger "Send Notifications" manually → pick environment + persona
         ↓
 hooks fire: Slack / Teams / Confluence / webhook
         ─────────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ The automatic path (merge → generate → commit) runs on every push with no ac
 | `config/` | Your `team-config.yml` (deploy points, AI provider) and `voice.md` (brand voice) live here. |
 | `examples/` | Sample config and a full end-to-end walkthrough. Start here. |
 | `release-notes/` | Where Legibly commits generated markdown. Organised by environment. |
-| `action/` | The GitHub Action source code (TypeScript). You don't need to touch this. |
+| `action/` | The CI action source code (TypeScript). Runs on GitHub Actions, GitLab CI, Bitbucket Pipelines, or any CI that can run Node.js. You don't need to touch this. |
 | `prompts/` | The AI prompt templates Legibly uses internally. |
 
 ---
@@ -145,17 +146,17 @@ audience needed to hear. Same facts. Right signal for the right person.
 
 ## Quick Start
 
-**Requirements:** Node.js 20+, a GitHub repo, an AI provider key or GitHub Copilot Enterprise access.
+**Requirements:** Node.js 20+, an AI provider key or GitHub Copilot Enterprise access, and one of: GitHub, GitLab, Bitbucket, or any CI that can run Node.js.
 
 ```bash
-# 1. Fork this repo on GitHub
+# 1. Fork or clone this repo
 
 # 2. Copy and configure the sample config
 cp examples/sample-team-config.yml config/team-config.yml
 
 # 3. Set your team name, AI provider, and deploy points (branches → personas)
 
-# 4. Add your AI provider key to GitHub Actions secrets (AI_API_KEY)
+# 4. Add your AI provider key to your CI secrets as AI_API_KEY
 #    Jira secrets are optional. Legibly works without them.
 
 # 5. Test locally before pushing (see Local Development)
@@ -163,7 +164,7 @@ cp examples/sample-team-config.yml config/team-config.yml
 # 6. Push to a configured branch. Legibly runs automatically.
 ```
 
-See the [Setup Guide](docs/setup.md) for full configuration details.
+See the [Setup Guide](docs/setup.md) for GitHub Actions setup, or the [CI Platforms](#ci-platforms) section below for GitLab, Bitbucket, and other CI systems.
 
 ---
 
