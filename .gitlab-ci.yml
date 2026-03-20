@@ -1,0 +1,65 @@
+# .gitlab-ci.yml — Legibly release notes pipeline for GitLab CI
+# Mirrors .github/workflows/{ci,release-notes,notify}.yml
+
+stages:
+  - test
+  - generate
+  - notify
+
+default:
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - action/package-lock.json
+    paths:
+      - action/node_modules/
+
+typecheck-and-lint:
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+    - if: '$CI_COMMIT_BRANCH =~ /^hotfix\//'
+  script:
+    - cd action && npm ci && npm run typecheck && npm run lint
+
+generate-release-notes:
+  stage: generate
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH =~ /^hotfix\//'
+      when: on_success
+    - when: never
+  script:
+    - cd action && npm ci && npm run build
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        export DEPLOY_ENVIRONMENT="production"
+      elif echo "$CI_COMMIT_BRANCH" | grep -q "^release/"; then
+        export DEPLOY_ENVIRONMENT="staging"
+      else
+        export DEPLOY_ENVIRONMENT="hotfix"
+      fi
+    - node dist/index.js
+    - |
+      git config user.email "legibly-bot@ci"
+      git config user.name "Legibly Bot"
+      git add release-notes/ || true
+      git diff --cached --quiet || git commit -m "chore: generated release notes [skip ci]"
+      git push "https://oauth2:${CI_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:"$CI_COMMIT_BRANCH"
+
+send-notifications:
+  stage: notify
+  rules:
+    - when: manual
+  allow_failure: false
+  variables:
+    PERSONA: "*"
+    ENVIRONMENT: "production"
+  script:
+    - cd action && npm ci && npm run build && node dist/notify.js

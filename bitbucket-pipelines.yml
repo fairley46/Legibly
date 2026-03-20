@@ -1,0 +1,58 @@
+# bitbucket-pipelines.yml — Legibly release notes pipeline for Bitbucket
+image: node:20-alpine
+
+definitions:
+  caches:
+    action-node: action/node_modules
+  steps:
+    - step: &typecheck-and-lint
+        name: Typecheck and Lint
+        caches:
+          - action-node
+        script:
+          - cd action && npm ci && npm run typecheck && npm run lint
+
+    - step: &generate-notes
+        name: Generate Release Notes
+        caches:
+          - action-node
+        script:
+          - cd action && npm ci && npm run build
+          - |
+            case "$BITBUCKET_BRANCH" in
+              main|master) export DEPLOY_ENVIRONMENT="production" ;;
+              release/*) export DEPLOY_ENVIRONMENT="staging" ;;
+              hotfix/*) export DEPLOY_ENVIRONMENT="hotfix" ;;
+              *) export DEPLOY_ENVIRONMENT="production" ;;
+            esac
+          - node dist/index.js
+          - |
+            git config user.email "legibly-bot@ci"
+            git config user.name "Legibly Bot"
+            git add release-notes/ || true
+            git diff --cached --quiet || git commit -m "chore: generated release notes [skip ci]"
+            git push "https://x-token-auth:${BB_ACCESS_TOKEN}@bitbucket.org/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}.git" HEAD:"$BITBUCKET_BRANCH"
+
+    - step: &send-notifications
+        name: Send Notifications
+        trigger: manual
+        script:
+          - cd action && npm ci && npm run build && node dist/notify.js
+
+pipelines:
+  branches:
+    main:
+      - step: *typecheck-and-lint
+      - step: *generate-notes
+      - step: *send-notifications
+    'release/**':
+      - step: *typecheck-and-lint
+      - step: *generate-notes
+      - step: *send-notifications
+    'hotfix/**':
+      - step: *typecheck-and-lint
+      - step: *generate-notes
+      - step: *send-notifications
+  pull-requests:
+    '**':
+      - step: *typecheck-and-lint
