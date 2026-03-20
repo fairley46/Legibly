@@ -167,6 +167,17 @@ See the [Setup Guide](docs/setup.md) for full configuration details.
 
 ---
 
+## CI Platforms
+
+| Platform | Config file | Setup guide |
+|----------|-------------|-------------|
+| GitHub Actions | `.github/workflows/` (included) | [docs/setup.md](docs/setup.md) |
+| GitLab CI | `.gitlab-ci.yml` (included) | [docs/gitlab-setup.md](docs/gitlab-setup.md) |
+| Bitbucket Pipelines | `bitbucket-pipelines.yml` (included) | [docs/bitbucket-setup.md](docs/bitbucket-setup.md) |
+| Azure DevOps, CircleCI, Jenkins | Run `node action/dist/index.js` directly | [docs/other-ci-setup.md](docs/other-ci-setup.md) |
+
+---
+
 ## Personas
 
 Personas are the core of Legibly. Each persona is a plain markdown file in the `personas/` folder that defines a specific audience: who they are, what they care about, how they want to be spoken to, and the exact structure of their release notes.
