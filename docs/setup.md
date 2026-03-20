@@ -1,6 +1,23 @@
 # Setup Guide
 
-## Step 1: Configure your team
+- [Setup](#setup)
+  - [Step 1: Configure your team](#step-1-configure-your-team)
+  - [Step 2: Choose your AI provider](#step-2-choose-your-ai-provider)
+  - [Step 3: Add secrets](#step-3-add-secrets)
+  - [Step 4: Customize your voice](#step-4-customize-your-voice)
+- [Engineering Process](#engineering-process)
+  - [PR descriptions are the main input](#pr-descriptions-are-the-main-input)
+  - [Commit messages fill the gaps](#commit-messages-fill-the-gaps)
+  - [Writing PRs with an AI coding agent](#writing-prs-with-an-ai-coding-agent)
+  - [Before you merge](#before-you-merge)
+- [Local Development](#local-development)
+- [MCP Skill](#mcp-skill)
+
+---
+
+## Setup
+
+### Step 1: Configure your team
 
 Copy the sample config:
 
@@ -31,7 +48,7 @@ deploy_points:
 
 ---
 
-## Step 2: Choose your AI provider
+### Step 2: Choose your AI provider
 
 Set `ai_provider.type` in `team-config.yml`:
 
@@ -50,7 +67,7 @@ ai_provider:
 
 ---
 
-## Step 3: Add secrets
+### Step 3: Add secrets
 
 Add the following secrets to your CI system:
 
@@ -74,7 +91,7 @@ Legibly works without Jira. If the secrets aren't set, it skips ticket enrichmen
 
 ---
 
-## Step 4: Customize your voice
+### Step 4: Customize your voice
 
 Open `config/voice.md` and update it to match your brand. This file defines:
 
@@ -87,19 +104,23 @@ This file is owned by the product team. No engineering changes needed to update 
 
 ---
 
-## You're set
+### You're set
 
-Push to a configured branch. Legibly will generate a release note for each persona in that deploy point and commit the files to `release-notes/{environment}/` automatically. No further action required.
+Push to a configured branch. Legibly will generate a release note for each persona in that deploy point and commit the files to `release-notes/{environment}/` automatically.
 
-Before your first merge, read [Engineering Process](#engineering-process). The quality of generated notes depends entirely on what your team puts into PR descriptions and commit messages. Two minutes there will pay off on every deploy.
+Before your first merge, read the [Engineering Process](#engineering-process) section below. The quality of generated notes depends entirely on what your team puts into PR descriptions and commit messages. Two minutes there pays off on every deploy.
 
-To optionally send those notes to Slack, Teams, Confluence, or a webhook, see [docs/notifications.md](notifications.md).
+To send notes to Slack, Teams, Confluence, or a webhook, see [docs/notifications.md](notifications.md).
 
 ---
 
 ## Engineering Process
 
-Legibly's output quality is entirely dependent on what goes into PRs and commits. The AI translates your inputs. It cannot invent specifics that aren't there.
+Legibly translates what it's given. The AI cannot invent specifics that aren't in the inputs — and it doesn't try to. What goes into the PR description and commit messages is what comes out of the release notes, rendered for each audience.
+
+This section is the mechanism for making sure those inputs are worth translating.
+
+---
 
 ### PR descriptions are the main input
 
@@ -112,6 +133,8 @@ Legibly reads the PR description first. If the description is vague, the notes w
 
 Signal doesn't need to be polished. It needs to be specific.
 
+---
+
 ### Commit messages fill the gaps
 
 Legibly reads the last 20 commit messages. They supplement the PR description, especially when a PR contains multiple distinct changes.
@@ -120,6 +143,8 @@ Legibly reads the last 20 commit messages. They supplement the PR description, e
 |---|---|
 | `fix auth bug` | Nothing useful |
 | `fix JWT expiry not refreshing on mobile after background resume` | Translatable. Audience, symptom, and trigger all present. |
+
+---
 
 ### Writing PRs with an AI coding agent
 
@@ -141,21 +166,11 @@ Legibly generates release notes (from PR description + diff)
 Committed to repo automatically — zero communication overhead
 ```
 
-This is the highest-leverage path. The description quality is what determines the output quality at every stage downstream.
+> **Note: code review is intentionally out of scope.** Legibly does not review code, validate accuracy, or verify that what was described actually shipped. The engineer is the accuracy gate. Legibly's job is translation — it takes the PR description and commit messages at face value and renders them for each audience. That separation keeps it fast, predictable, and easy to trust. Wrong or vague inputs produce wrong or vague notes, just in cleaner language.
 
 ---
 
-### Code review is intentionally out of scope
-
-Legibly does not review code, validate accuracy, or verify that what was described actually shipped. This is a deliberate design decision, not a gap.
-
-The engineer is the accuracy gate. Legibly's job is translation, not auditing. It takes what you put into the PR description and commit messages at face value and renders it for each audience. That separation keeps Legibly fast, predictable, and easy to trust — you control the inputs, it controls the presentation.
-
-Wrong or vague inputs produce wrong or vague notes, just in cleaner language. The checklist below is the mechanism for keeping inputs honest.
-
-### Short checklist
-
-Before merging:
+### Before you merge
 
 - [ ] PR title names the user-facing change, not the implementation (`Fix session timeout on mobile` not `Update JWT refresh handler`)
 - [ ] PR description has 2–3 sentences: what changed, why it matters, who it affects
