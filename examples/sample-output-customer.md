@@ -1,7 +1,7 @@
 ---
 release_date: 2026-03-16
 environment: production
-persona: end-user
+persona: customer
 commit: a3f7b2c1
 branch: main
 generated_by: Legibly

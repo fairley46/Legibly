@@ -12,21 +12,26 @@
 
 ## Table of Contents
 
-- [See It in Action](#see-it-in-action)
-- [The Problem](#the-problem)
-- [What Legibly Does](#what-legibly-does)
-- [How It Works](#how-it-works)
+- [See it in action](#see-it-in-action)
+- [Why](#why)
+- [What Legibly does](#what-legibly-does)
+- [Architecture](#architecture)
 - [Repo layout](#repo-layout)
-- [End-to-End Example](#end-to-end-example)
-- [Quick Start](#quick-start)
-- [CI Platforms](#ci-platforms)
+- [End-to-end example](#end-to-end-example)
+- [Quick start](#quick-start)
+- [CI platforms](#ci-platforms)
 - [Personas](#personas)
-- [Brand Voice](#brand-voice)
+- [Brand voice](#brand-voice)
+- [Status](#status)
 - [License](#license)
 
 ---
 
-## See It in Action
+## See it in action
+
+<p align="center">
+  <img src="docs/demo.png" alt="Same merge rendered for VP, customer, and technical-user personas" width="900">
+</p>
 
 **What the engineer committed:**
 > "Resolve race condition in payment processor. Lock TTL extended from 3.0s to 8.0s.
@@ -50,7 +55,7 @@ Same commit. Three different notes. Each one says exactly what that audience nee
 
 ---
 
-## The Problem
+## Why
 
 Engineers are shipping at a pace that didn't exist two years ago. A single agentic session can produce what used to take a sprint. But the communication layer hasn't kept up. Product owners still spend hours manually reading PRs, decoding commit messages, and translating technical changes into language that customers can understand. That's not a scalable job. The result: enormous engineering value that never gets communicated. Customers don't know what changed. Stakeholders can't see the progress.
 
@@ -60,7 +65,7 @@ Engineers are shipping at a pace that didn't exist two years ago. A single agent
 
 ---
 
-## What Legibly Does
+## What Legibly does
 
 On every merge or push, Legibly:
 
@@ -80,7 +85,7 @@ The product owner's job shifts from **writing** to **talking to customers**. The
 
 ---
 
-## How It Works
+## Architecture
 
 ```
 merge / push to configured branch
@@ -129,7 +134,7 @@ The automatic path (merge → generate → commit) runs on every push with no ac
 
 ---
 
-## End-to-End Example
+## End-to-end example
 
 See [`examples/e2e-example.md`](examples/e2e-example.md) for a complete walkthrough:
 
@@ -144,31 +149,40 @@ audience needed to hear. Same facts. Right signal for the right person.
 
 ---
 
-## Quick Start
+## Quick start
 
-**Requirements:** Node.js 20+, an AI provider key or GitHub Copilot Enterprise access, and one of: GitHub, GitLab, Bitbucket, or any CI that can run Node.js.
+**Requirements:** Node.js 20+. Generating notes also needs an AI provider key (or GitHub Copilot Enterprise) and a CI system that can run Node.js.
+
+### Verify the install (no secrets)
+
+From a fresh clone:
 
 ```bash
-# 1. Fork or clone this repo
-
-# 2. Copy and configure the sample config
-cp examples/sample-team-config.yml config/team-config.yml
-
-# 3. Set your team name, AI provider, and deploy points (branches → personas)
-
-# 4. Add your AI provider key to your CI secrets as AI_API_KEY
-#    Jira secrets are optional. Legibly works without them.
-
-# 5. Test locally before pushing (see Local Development)
-
-# 6. Push to a configured branch. Legibly runs automatically.
+cd action
+npm ci
+npm test
 ```
 
-See the [Setup Guide](docs/setup.md) for GitHub Actions setup, or the [CI Platforms](#ci-platforms) section below for GitLab, Bitbucket, and other CI systems.
+You should see Vitest report all tests passed. That is enough to confirm the toolchain on a clean machine.
+
+### Generate notes in CI
+
+```bash
+# 1. Copy and edit the sample config
+cp examples/sample-team-config.yml config/team-config.yml
+
+# 2. Set team name, AI provider, and deploy points (branches → personas)
+
+# 3. Add AI_API_KEY to your CI secrets (Jira secrets are optional)
+
+# 4. Push to a configured branch. Legibly runs automatically.
+```
+
+For a local dry-run before you push, see [Local Development](docs/setup.md#local-development). For GitHub Actions, GitLab, Bitbucket, and other CI systems, see [CI platforms](#ci-platforms).
 
 ---
 
-## CI Platforms
+## CI platforms
 
 | Platform | Config file | Setup guide |
 |----------|-------------|-------------|
@@ -199,7 +213,7 @@ Each file includes writing instructions, an exact output template, and a good/ba
 
 ---
 
-## Brand Voice
+## Brand voice
 
 If personas answer **who** you're writing for, brand voice answers **how you sound doing it.**
 
@@ -233,6 +247,12 @@ For instructions on building a custom voice from scratch, see [docs/customizatio
 
 ---
 
+## Status
+
+Public MIT prototype. Core path works: merge → generate → commit notes back on GitHub Actions, GitLab CI, and Bitbucket Pipelines. CI runs typecheck, lint, and unit tests on every PR. Notification hooks and the MCP skill ship; treat them as early. No SLA.
+
+---
+
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

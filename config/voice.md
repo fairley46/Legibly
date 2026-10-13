@@ -59,7 +59,7 @@ Never use:
 
 ```
 More formal <————————————————————————> More conversational
- [executive]  [partner]  [technical-user]  [end-user]  [internal]
+ [vp]  [partner]  [technical-user]  [customer]  [internal]
 ```
 
 ---

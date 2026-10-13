@@ -78,7 +78,7 @@ Rules:
 - If no user-visible changes exist (pure internal refactor), output exactly:
   `<!-- no-user-visible-changes -->` and nothing else
 - Do not invent metrics or outcomes not present in the input data
-- Do not include internal Jira ticket IDs in production/partner/end-user/executive output
+- Do not include internal Jira ticket IDs in production/partner/customer/vp output
   (internal and technical-user personas may include them)
 
 Produce ONLY the final markdown. No preamble. Begin directly with the frontmatter.
