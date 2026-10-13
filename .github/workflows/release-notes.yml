@@ -19,7 +19,7 @@ on:
         required: false
         type: string
       personas:
-        description: "Comma-separated persona override (e.g. executive,end-user)"
+        description: "Comma-separated persona override (e.g. vp,customer)"
         required: false
         type: string
 

@@ -204,6 +204,7 @@ npm run dev
 **Other useful commands:**
 
 ```bash
+npm test            # unit tests (no AI key required)
 npm run typecheck   # type-check without building
 npm run lint        # run ESLint
 npm run build       # compile TypeScript to dist/
