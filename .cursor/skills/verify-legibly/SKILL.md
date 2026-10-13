@@ -15,7 +15,7 @@ npm ci
 npm run build
 ```
 
-Ready when `action/dist/index.js` exists and `node -e "require('fs').accessSync('dist/index.js')"` exits 0 (ESM: use `fs.accessSync` from a small script, or `test -f dist/index.js`).
+Ready when `test -f dist/index.js` succeeds after build.
 
 For a short-lived CLI there is no long-running server. Each drive starts in its own shell under `action/`.
 
@@ -25,7 +25,7 @@ Teardown: remove only scratch dirs you created (for example `/tmp/legibly-verify
 
 ```bash
 cd action
-node -v                          # expect v20+
+node -v
 test -f package-lock.json
 npm run typecheck
 npm run lint
