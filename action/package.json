@@ -12,12 +12,12 @@
     "start": "node dist/index.js",
     "mcp": "node dist/mcp.js",
     "mcp:dev": "npm run build && node dist/mcp.js",
-    "test": "vitest run"
+    "test": "vitest run --dir src"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "~0.39.0",
-    "@modelcontextprotocol/sdk": "^1.10.0",
-    "js-yaml": "~4.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "js-yaml": "^4.3.2",
     "openai": "~4.0.0",
     "zod": "^3.22.0"
   },
@@ -28,7 +28,10 @@
     "dotenv": "^16.0.0",
     "typescript": "^5.4.0",
     "typescript-eslint": "^8.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^4.1.12"
+  },
+  "overrides": {
+    "proxy-addr": ">=2.0.8"
   },
   "engines": {
     "node": ">=20.0.0"
